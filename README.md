@@ -1,6 +1,6 @@
 # Stage Capture (MVP)
 
-Build your audience from the stage.
+Grow your mailing list from the stage.
 
 ### Initial MVP Functionality
 - Text a number with a keyword to your email. 
