@@ -27,7 +27,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <div className="min-h-screen flex flex-col">
+          <header className="w-full p-4">
+            <div className="text-xl font-semibold">Stage Capture</div>
+          </header>
+          <main className="flex-1">{children}</main>
+          <footer className="w-full p-4 text-sm text-gray-500">Stage Capture v0.1.0</footer>
+        </div>
       </body>
     </html>
   );
