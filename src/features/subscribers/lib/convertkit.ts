@@ -10,6 +10,32 @@ export type TagInfoResult =
 
 // Removed legacy getTagInfo tied to CONVERTKIT_TAG_ID
 
+type KitErrorJson = {
+  errors?: string[];
+  message?: string;
+};
+
+type KitTag = {
+  id: number | string;
+  name?: string;
+};
+
+type ListTagsJson = KitErrorJson & {
+  tags?: KitTag[];
+};
+
+type CreateTagJson = KitErrorJson & {
+  tag?: KitTag;
+};
+
+type CreateSubscriberJson = KitErrorJson & {
+  subscriber?: { id: number | string };
+};
+
+type LookupSubscribersJson = KitErrorJson & {
+  subscribers?: Array<{ id: number | string }>;
+};
+
 export async function ensureTagByName(tagName: string): Promise<TagInfoResult> {
   const name = (tagName || "").trim();
   if (!name) {
@@ -33,13 +59,11 @@ export async function ensureTagByName(tagName: string): Promise<TagInfoResult> {
         "X-Kit-Api-Key": env.convertkitApiKey,
       },
     });
-    const listJson = await listRes.json().catch(() => ({}));
-    if (listRes.ok && Array.isArray((listJson as any)?.tags)) {
-      const found = (listJson as any).tags.find((t: any) =>
-        String(t?.name || "").toLowerCase() === name.toLowerCase()
-      );
+    const listJson = (await listRes.json().catch(() => ({}))) as ListTagsJson;
+    if (listRes.ok && Array.isArray(listJson.tags)) {
+      const found = listJson.tags.find((t) => String(t?.name ?? "").toLowerCase() === name.toLowerCase());
       if (found?.id) {
-        return { ok: true, status: 200, id: String(found.id), name: String(found.name) };
+        return { ok: true, status: 200, id: String(found.id), name: String(found.name ?? name) };
       }
     }
 
@@ -52,16 +76,16 @@ export async function ensureTagByName(tagName: string): Promise<TagInfoResult> {
       },
       body: JSON.stringify({ name }),
     });
-    const createJson = await createRes.json().catch(() => ({}));
+    const createJson = (await createRes.json().catch(() => ({}))) as CreateTagJson;
     if (!createRes.ok) {
-      const msg =
-        (createJson && typeof createJson === "object" && Array.isArray((createJson as any).errors) && (createJson as any).errors[0]) ||
-        (typeof createJson === "string" ? createJson : "Failed to create tag");
-      return { ok: false, status: createRes.status || 500, error: String(msg) };
+      const msg = Array.isArray(createJson.errors) && createJson.errors[0]
+        ? createJson.errors[0]
+        : createJson.message || "Failed to create tag";
+      return { ok: false, status: createRes.status || 500, error: msg };
     }
-    const created = (createJson as any)?.tag;
+    const created = createJson.tag;
     if (created?.id) {
-      return { ok: true, status: 201, id: String(created.id), name: String(created.name || name) };
+      return { ok: true, status: 201, id: String(created.id), name: String(created.name ?? name) };
     }
     return { ok: false, status: 500, error: "Unexpected create tag response" };
   } catch (e) {
@@ -107,11 +131,11 @@ export async function subscribeEmailToTag(email: string, tagName?: string): Prom
 
       const ct = res.headers.get("content-type") || "";
       const isJson = ct.includes("application/json");
-      const body = isJson ? await res.json() : await res.text();
+      const body = (isJson ? await res.json() : await res.text()) as CreateSubscriberJson | string;
 
       const existingId =
-        body && typeof body === "object" && (body as any).subscriber?.id
-          ? String((body as any).subscriber.id)
+        typeof body === "object" && body && body.subscriber?.id !== undefined
+          ? String(body.subscriber.id)
           : undefined;
       if (res.ok && existingId) {
         return { ok: true, id: existingId };
@@ -129,19 +153,20 @@ export async function subscribeEmailToTag(email: string, tagName?: string): Prom
             },
           }
         );
-        const lookupJson = await lookup.json().catch(() => ({}));
+        const lookupJson = (await lookup.json().catch(() => ({}))) as LookupSubscribersJson;
         if (
           lookup.ok &&
-          Array.isArray((lookupJson as any)?.subscribers) &&
-          (lookupJson as any).subscribers[0]?.id
+          Array.isArray(lookupJson.subscribers) &&
+          lookupJson.subscribers[0]?.id
         ) {
-          return { ok: true, id: String((lookupJson as any).subscribers[0].id) };
+          return { ok: true, id: String(lookupJson.subscribers[0].id) };
         }
       }
 
       const msg =
-        (body && typeof body === "object" && Array.isArray((body as any).errors) && (body as any).errors[0]) ||
-        (typeof body === "string" ? body : "Failed to create subscriber");
+        typeof body === "object"
+          ? (Array.isArray(body.errors) && body.errors[0]) || body.message || "Failed to create subscriber"
+          : body || "Failed to create subscriber";
       return { ok: false, status: res.status || 500, error: String(msg) };
     } catch (e) {
       const m = e instanceof Error ? e.message : "Network error";
@@ -162,10 +187,10 @@ export async function subscribeEmailToTag(email: string, tagName?: string): Prom
         },
       });
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        const msg =
-          (body && typeof body === "object" && Array.isArray((body as any).errors) && (body as any).errors[0]) ||
-          "Failed to tag subscriber";
+        const body = (await res.json().catch(() => ({}))) as KitErrorJson | Record<string, never>;
+        const msg = Array.isArray((body as KitErrorJson).errors) && (body as KitErrorJson).errors![0]
+          ? (body as KitErrorJson).errors![0]
+          : (body as KitErrorJson).message || "Failed to tag subscriber";
         return { ok: false, status: res.status, error: String(msg) };
       }
       return { ok: true, status: res.status, data: undefined };

@@ -13,7 +13,6 @@ export default function AddSubscriberForm() {
   const [state, setState] = useState<FormState>({ status: "idle" });
   const [tagName, setTagName] = useState<string>("source-howdy");
   const [tagError, setTagError] = useState<string | null>(null);
-  const [isLoadingTag, setIsLoadingTag] = useState<boolean>(false);
 
   useEffect(() => {
     setTagError(null);
@@ -33,21 +32,20 @@ export default function AddSubscriberForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, tag: tagName }),
       });
-      const data = await res.json().catch(() => ({} as unknown));
+      const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({} as unknown as { ok?: boolean; error?: string }));
 
-      if (!res.ok || (data as any)?.ok === false) {
+      if (!res.ok || data?.ok === false) {
         const status = res.status;
-        const serverError = typeof (data as any)?.error === "string" ? (data as any).error : undefined;
+        const serverError = typeof data?.error === "string" ? data.error : undefined;
 
         let friendly = "Failed to subscribe.";
         if (status === 400) friendly = serverError || "Please enter a valid email address.";
         else if (status === 401 || status === 403) friendly = "Authentication failed. Check CONVERTKIT_API_KEY.";
-        else if (status === 404) friendly = "Tag not found. Check CONVERTKIT_TAG_ID is a numeric tag ID.";
+        else if (status === 404) friendly = "Tag not found or not accessible.";
         else if (status === 422) friendly = serverError || "Validation failed. Please check the email.";
         else if (status >= 500) friendly = serverError || "Server error. Please try again shortly.";
 
         // Log detailed diagnostics for developers
-        // eslint-disable-next-line no-console
         console.error("/api/subscribers error", { status, response: data });
 
         setState({ status: "error", message: friendly });
@@ -56,7 +54,6 @@ export default function AddSubscriberForm() {
       setEmail("");
       setState({ status: "success", message: "Subscriber added successfully." });
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error("Network error calling /api/subscribers", error);
       setState({ status: "error", message: "Network error. Please try again." });
     }
@@ -69,7 +66,7 @@ export default function AddSubscriberForm() {
       <div className="w-full max-w-md mx-auto rounded-xl border border-gray-200 bg-white/50 dark:bg-black/20 shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-2">Add a subscriber</h2>
         <p className="text-sm text-gray-600 mb-6">
-          Enter an email. We'll add it to your Kit account and tag it with {tagName ? <span className="font-medium">{tagName}</span> : "your tag"}.
+          Enter an email. We&apos;ll add it to your Kit account and tag it with {tagName ? <span className="font-medium">{tagName}</span> : "your tag"}.
         </p>
         {tagError && (
           <p className="-mt-4 mb-4 text-sm text-amber-600">{tagError}</p>
