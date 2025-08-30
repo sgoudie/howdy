@@ -8,44 +8,7 @@ export type TagInfoResult =
   | { ok: true; status: number; id: string; name: string }
   | { ok: false; status: number; error: string };
 
-export async function getTagInfo(): Promise<TagInfoResult> {
-  let env;
-  try {
-    env = getServerEnv();
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Server configuration error";
-    return { ok: false, status: 500, error: message };
-  }
-
-  try {
-    // Per docs: use X-Kit-Api-Key header for v4
-    const response = await fetch("https://api.kit.com/v4/tags", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Kit-Api-Key": env.convertkitApiKey,
-      },
-    });
-
-    const json = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      const msg =
-        (json && typeof json === "object" && Array.isArray((json as any).errors) && (json as any).errors[0]) ||
-        (typeof (json as any)?.message === "string" ? (json as any).message : "Failed to list tags.");
-      return { ok: false, status: response.status, error: String(msg) };
-    }
-    const tags = Array.isArray((json as any)?.tags) ? (json as any).tags : Array.isArray(json) ? (json as any) : [];
-    const match = tags.find((t: any) => String(t?.id) === env.convertkitTagId);
-    if (!match) {
-      return { ok: false, status: 404, error: "Tag not found for CONVERTKIT_TAG_ID" };
-    }
-    const name = typeof match?.name === "string" ? match.name : String(match?.id);
-    return { ok: true, status: 200, id: String(match.id), name };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Network error";
-    return { ok: false, status: 500, error: message };
-  }
-}
+// Removed legacy getTagInfo tied to CONVERTKIT_TAG_ID
 
 export async function ensureTagByName(tagName: string): Promise<TagInfoResult> {
   const name = (tagName || "").trim();
@@ -121,15 +84,13 @@ export async function subscribeEmailToTag(email: string, tagName?: string): Prom
     return { ok: false, status: 500, error: message };
   }
 
-  // Determine tag to use: provided name or env tag id/name
-  let tagIdToUse = env.convertkitTagId;
-  if (tagName && tagName.trim()) {
-    const ensured = await ensureTagByName(tagName.trim());
-    if (!ensured.ok) {
-      return { ok: false, status: ensured.status, error: ensured.error };
-    }
-    tagIdToUse = ensured.id;
+  // Determine tag to use: name provided or default 'source-howdy'
+  const desiredTagName = (tagName && tagName.trim()) || "source-howdy";
+  const ensured = await ensureTagByName(desiredTagName);
+  if (!ensured.ok) {
+    return { ok: false, status: ensured.status, error: ensured.error };
   }
+  const tagIdToUse = ensured.id;
 
   async function createSubscriberAndGetId(): Promise<
     { ok: true; id: string } | { ok: false; status: number; error: string }
