@@ -47,7 +47,67 @@ export async function getTagInfo(): Promise<TagInfoResult> {
   }
 }
 
-export async function subscribeEmailToTag(email: string): Promise<SubscribeResult> {
+export async function ensureTagByName(tagName: string): Promise<TagInfoResult> {
+  const name = (tagName || "").trim();
+  if (!name) {
+    return { ok: false, status: 400, error: "Tag name is required" };
+  }
+
+  let env;
+  try {
+    env = getServerEnv();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Server configuration error";
+    return { ok: false, status: 500, error: message };
+  }
+
+  try {
+    // 1) list tags and match by name (case-insensitive)
+    const listRes = await fetch("https://api.kit.com/v4/tags", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Kit-Api-Key": env.convertkitApiKey,
+      },
+    });
+    const listJson = await listRes.json().catch(() => ({}));
+    if (listRes.ok && Array.isArray((listJson as any)?.tags)) {
+      const found = (listJson as any).tags.find((t: any) =>
+        String(t?.name || "").toLowerCase() === name.toLowerCase()
+      );
+      if (found?.id) {
+        return { ok: true, status: 200, id: String(found.id), name: String(found.name) };
+      }
+    }
+
+    // 2) create if not found
+    const createRes = await fetch("https://api.kit.com/v4/tags", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Kit-Api-Key": env.convertkitApiKey,
+      },
+      body: JSON.stringify({ name }),
+    });
+    const createJson = await createRes.json().catch(() => ({}));
+    if (!createRes.ok) {
+      const msg =
+        (createJson && typeof createJson === "object" && Array.isArray((createJson as any).errors) && (createJson as any).errors[0]) ||
+        (typeof createJson === "string" ? createJson : "Failed to create tag");
+      return { ok: false, status: createRes.status || 500, error: String(msg) };
+    }
+    const created = (createJson as any)?.tag;
+    if (created?.id) {
+      return { ok: true, status: 201, id: String(created.id), name: String(created.name || name) };
+    }
+    return { ok: false, status: 500, error: "Unexpected create tag response" };
+  } catch (e) {
+    const m = e instanceof Error ? e.message : "Network error";
+    return { ok: false, status: 500, error: m };
+  }
+}
+
+export async function subscribeEmailToTag(email: string, tagName?: string): Promise<SubscribeResult> {
   const trimmedEmail = (email || "").trim();
   if (!trimmedEmail || !trimmedEmail.includes("@")) {
     return { ok: false, status: 400, error: "A valid email is required." };
@@ -59,6 +119,16 @@ export async function subscribeEmailToTag(email: string): Promise<SubscribeResul
   } catch (err) {
     const message = err instanceof Error ? err.message : "Server configuration error";
     return { ok: false, status: 500, error: message };
+  }
+
+  // Determine tag to use: provided name or env tag id/name
+  let tagIdToUse = env.convertkitTagId;
+  if (tagName && tagName.trim()) {
+    const ensured = await ensureTagByName(tagName.trim());
+    if (!ensured.ok) {
+      return { ok: false, status: ensured.status, error: ensured.error };
+    }
+    tagIdToUse = ensured.id;
   }
 
   async function createSubscriberAndGetId(): Promise<
@@ -120,7 +190,7 @@ export async function subscribeEmailToTag(email: string): Promise<SubscribeResul
 
   async function tagSubscriberId(subscriberId: string): Promise<SubscribeResult> {
     try {
-      const tagUrl = `https://api.kit.com/v4/tags/${encodeURIComponent(env.convertkitTagId)}/subscribers/${encodeURIComponent(
+      const tagUrl = `https://api.kit.com/v4/tags/${encodeURIComponent(tagIdToUse)}/subscribers/${encodeURIComponent(
         subscriberId
       )}`;
       const res = await fetch(tagUrl, {

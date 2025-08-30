@@ -11,37 +11,13 @@ type FormState =
 export default function AddSubscriberForm() {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<FormState>({ status: "idle" });
-  const [tagName, setTagName] = useState<string | null>(null);
+  const [tagName, setTagName] = useState<string>("source-howdy");
   const [tagError, setTagError] = useState<string | null>(null);
-  const [isLoadingTag, setIsLoadingTag] = useState<boolean>(true);
+  const [isLoadingTag, setIsLoadingTag] = useState<boolean>(false);
 
   useEffect(() => {
-    let isMounted = true;
-    async function loadTag() {
-      try {
-        const res = await fetch("/api/subscribers/tag", { method: "GET" });
-        const data = await res.json().catch(() => ({} as any));
-        if (!res.ok || data?.ok === false) {
-          const status = res.status;
-          const err = typeof data?.error === "string" ? data.error : "Failed to load tag.";
-          // eslint-disable-next-line no-console
-          console.error("/api/subscribers/tag error", { status, response: data });
-          if (isMounted) setTagError(err);
-          return;
-        }
-        if (isMounted) setTagName(typeof data?.name === "string" ? data.name : null);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error("Network error calling /api/subscribers/tag", error);
-        if (isMounted) setTagError("Network error.");
-      }
-      if (isMounted) setIsLoadingTag(false);
-    }
-    loadTag();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    setTagError(null);
+  }, [tagName]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -55,7 +31,7 @@ export default function AddSubscriberForm() {
       const res = await fetch("/api/subscribers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, tag: tagName }),
       });
       const data = await res.json().catch(() => ({} as unknown));
 
@@ -92,18 +68,12 @@ export default function AddSubscriberForm() {
     <div className="w-full py-16 flex items-center justify-center">
       <div className="w-full max-w-md mx-auto rounded-xl border border-gray-200 bg-white/50 dark:bg-black/20 shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-2">Add a subscriber</h2>
-        {!isLoadingTag && (
-          <p className="text-sm text-gray-600 mb-6">
-            Enter an email. We'll add it to your Kit account and tag it with {tagName ? <span className="font-medium">{tagName}</span> : "your tag"}.
-          </p>
-        )}
-        {isLoadingTag && (
-          <div className="mb-6 h-5 w-3/4 animate-pulse rounded bg-gray-200/60 dark:bg-gray-700/40" />
-        )}
+        <p className="text-sm text-gray-600 mb-6">
+          Enter an email. We'll add it to your Kit account and tag it with {tagName ? <span className="font-medium">{tagName}</span> : "your tag"}.
+        </p>
         {tagError && (
           <p className="-mt-4 mb-4 text-sm text-amber-600">{tagError}</p>
         )}
-        {!isLoadingTag && (
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="email"
@@ -116,6 +86,14 @@ export default function AddSubscriberForm() {
             placeholder="you@example.com"
             className="w-full rounded-lg border border-gray-300 bg-white/80 dark:bg-black/30 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          <input
+            type="text"
+            name="tag"
+            value={tagName}
+            onChange={(e) => setTagName(e.target.value)}
+            placeholder="tag name (e.g., source-howdy)"
+            className="w-full rounded-lg border border-gray-300 bg-white/80 dark:bg-black/30 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
           <button
             type="submit"
             disabled={isLoading}
@@ -124,7 +102,6 @@ export default function AddSubscriberForm() {
             {isLoading ? "Subscribing..." : "Add Subscriber"}
           </button>
         </form>
-        )}
         {state.status === "success" && (
           <p className="mt-4 text-sm text-green-600">{state.message}</p>
         )}

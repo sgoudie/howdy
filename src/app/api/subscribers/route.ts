@@ -9,8 +9,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
     const email = typeof body?.email === "string" ? body.email : "";
+    const tag = typeof body?.tag === "string" ? body.tag : undefined;
 
-    const result = await subscribeEmailToTag(email);
+    const result = await subscribeEmailToTag(email, tag || "source-howdy");
 
     if (!result.ok) {
       return NextResponse.json(
