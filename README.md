@@ -1,4 +1,4 @@
-# Stage Capture (MVP)
+# Howdy (MVP)
 
 Grow your mailing list from the stage.
 

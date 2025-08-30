@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Stage Capture",
+  title: "Howdy",
   description: "Grow your mailing list from the stage.",
 };
 
@@ -29,10 +29,10 @@ export default function RootLayout({
       >
         <div className="min-h-screen flex flex-col">
           <header className="w-full p-4">
-            <div className="text-xl font-semibold">Stage Capture</div>
+            <div className="text-xl font-semibold">Howdy</div>
           </header>
           <main className="flex-1">{children}</main>
-          <footer className="w-full p-4 text-sm text-gray-500">Stage Capture v0.1.0</footer>
+          <footer className="w-full p-4 text-sm text-gray-500">Howdy v0.1.0</footer>
         </div>
       </body>
     </html>
