@@ -1,5 +1,5 @@
-import AddSubscriberForm from "@/features/subscribers/components/AddSubscriberForm";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <AddSubscriberForm />;
+  redirect("/dashboard");
 }
