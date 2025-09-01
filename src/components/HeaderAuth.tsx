@@ -47,6 +47,12 @@ export default function HeaderAuth() {
       {auth.status === "authenticated" ? (
         <>
           <span className="text-sm text-gray-600 hidden sm:inline">{auth.email}</span>
+          <Link
+            href="/settings"
+            className="inline-flex items-center justify-center rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
+          >
+            Account Settings
+          </Link>
           <button
             onClick={handleLogout}
             className="inline-flex items-center justify-center rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
