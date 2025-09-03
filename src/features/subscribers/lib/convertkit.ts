@@ -1,4 +1,4 @@
-import { getServerEnv } from "@/lib/env";
+// Uses per-account ConvertKit API key provided by caller
 
 export type SubscribeResult =
   | { ok: true; status: number; data?: unknown }
@@ -36,18 +36,10 @@ type LookupSubscribersJson = KitErrorJson & {
   subscribers?: Array<{ id: number | string }>;
 };
 
-export async function ensureTagByName(tagName: string): Promise<TagInfoResult> {
+export async function ensureTagByName(tagName: string, apiKey: string): Promise<TagInfoResult> {
   const name = (tagName || "").trim();
   if (!name) {
     return { ok: false, status: 400, error: "Tag name is required" };
-  }
-
-  let env;
-  try {
-    env = getServerEnv();
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Server configuration error";
-    return { ok: false, status: 500, error: message };
   }
 
   try {
@@ -56,7 +48,7 @@ export async function ensureTagByName(tagName: string): Promise<TagInfoResult> {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "X-Kit-Api-Key": env.convertkitApiKey,
+        "X-Kit-Api-Key": apiKey,
       },
     });
     const listJson = (await listRes.json().catch(() => ({}))) as ListTagsJson;
@@ -72,7 +64,7 @@ export async function ensureTagByName(tagName: string): Promise<TagInfoResult> {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Kit-Api-Key": env.convertkitApiKey,
+        "X-Kit-Api-Key": apiKey,
       },
       body: JSON.stringify({ name }),
     });
@@ -94,23 +86,15 @@ export async function ensureTagByName(tagName: string): Promise<TagInfoResult> {
   }
 }
 
-export async function subscribeEmailToTag(email: string, tagName?: string): Promise<SubscribeResult> {
+export async function subscribeEmailToTag(email: string, tagName: string | undefined, apiKey: string): Promise<SubscribeResult> {
   const trimmedEmail = (email || "").trim();
   if (!trimmedEmail || !trimmedEmail.includes("@")) {
     return { ok: false, status: 400, error: "A valid email is required." };
   }
 
-  let env: ReturnType<typeof getServerEnv>;
-  try {
-    env = getServerEnv();
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Server configuration error";
-    return { ok: false, status: 500, error: message };
-  }
-
   // Determine tag to use: name provided or default 'source-howdy'
   const desiredTagName = (tagName && tagName.trim()) || "source-howdy";
-  const ensured = await ensureTagByName(desiredTagName);
+  const ensured = await ensureTagByName(desiredTagName, apiKey);
   if (!ensured.ok) {
     return { ok: false, status: ensured.status, error: ensured.error };
   }
@@ -124,7 +108,7 @@ export async function subscribeEmailToTag(email: string, tagName?: string): Prom
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Kit-Api-Key": env.convertkitApiKey,
+          "X-Kit-Api-Key": apiKey,
         },
         body: JSON.stringify({ email_address: trimmedEmail }),
       });
@@ -149,7 +133,7 @@ export async function subscribeEmailToTag(email: string, tagName?: string): Prom
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              "X-Kit-Api-Key": env.convertkitApiKey,
+              "X-Kit-Api-Key": apiKey,
             },
           }
         );
@@ -183,7 +167,7 @@ export async function subscribeEmailToTag(email: string, tagName?: string): Prom
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Kit-Api-Key": env.convertkitApiKey,
+          "X-Kit-Api-Key": apiKey,
         },
       });
       if (!res.ok) {

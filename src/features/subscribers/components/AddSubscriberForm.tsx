@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 
 type FormState =
   | { status: "idle" }
@@ -27,9 +28,15 @@ export default function AddSubscriberForm() {
 
     setState({ status: "loading" });
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) {
+        setState({ status: "error", message: "Please log in to add subscribers." });
+        return;
+      }
       const res = await fetch("/api/subscribers", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ email, tag: tagName }),
       });
       const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({} as unknown as { ok?: boolean; error?: string }));
@@ -40,7 +47,7 @@ export default function AddSubscriberForm() {
 
         let friendly = "Failed to subscribe.";
         if (status === 400) friendly = serverError || "Please enter a valid email address.";
-        else if (status === 401 || status === 403) friendly = "Authentication failed. Check CONVERTKIT_API_KEY.";
+        else if (status === 401 || status === 403) friendly = "Not authenticated. Please log in and try again.";
         else if (status === 404) friendly = "Tag not found or not accessible.";
         else if (status === 422) friendly = serverError || "Validation failed. Please check the email.";
         else if (status >= 500) friendly = serverError || "Server error. Please try again shortly.";

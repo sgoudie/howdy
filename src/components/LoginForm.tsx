@@ -22,7 +22,12 @@ export default function LoginForm() {
 
     setState({ status: "loading" });
     try {
-      const { error } = await supabase.auth.signInWithOtp({ email });
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
       if (error) {
         setState({ status: "error", message: error.message || "Login failed." });
         return;

@@ -1,57 +1,21 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { redirect } from "next/navigation";
+import { getSupabaseServer } from "@/lib/supabaseServer";
 import AddSubscriberForm from "@/features/subscribers/components/AddSubscriberForm";
 
-type SessionState =
-  | { status: "loading" }
-  | { status: "unauthenticated" }
-  | { status: "authenticated"; email: string };
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-export default function DashboardPage() {
-  const router = useRouter();
-  const [sessionState, setSessionState] = useState<SessionState>({ status: "loading" });
-
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      const { data } = await supabase.auth.getSession();
-      const email = data.session?.user?.email || null;
-      if (!isMounted) return;
-      if (email) {
-        setSessionState({ status: "authenticated", email });
-      } else {
-        setSessionState({ status: "unauthenticated" });
-        router.replace("/login");
-      }
-    })();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, currentSession) => {
-      const email = currentSession?.user?.email || null;
-      if (email) {
-        setSessionState({ status: "authenticated", email });
-      } else {
-        setSessionState({ status: "unauthenticated" });
-        router.replace("/login");
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      authListener.subscription.unsubscribe();
-    };
-  }, [router]);
-
-  if (sessionState.status !== "authenticated") {
-    return null;
-  }
+export default async function DashboardPage() {
+  const supabase = getSupabaseServer();
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+  const hasFirstName = user && user.user_metadata && user.user_metadata.first_name;
+  if (!user) redirect("/login");
 
   return (
     <div className="w-full">
       <div className="max-w-2xl mx-auto px-4">
-        <h1 className="text-2xl font-semibold mt-8">Welcome {sessionState.email}</h1>
+        <h1 className="text-2xl font-semibold mt-8">Welcome {hasFirstName ? user.user_metadata.first_name : ""}</h1>
       </div>
       <AddSubscriberForm />
     </div>

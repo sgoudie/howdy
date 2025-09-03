@@ -38,10 +38,6 @@ export default function HeaderAuth() {
     await supabase.auth.signOut();
   }
 
-  if (auth.status === "loading") {
-    return null;
-  }
-
   return (
     <div className="flex items-center gap-3">
       {auth.status === "authenticated" ? (
@@ -65,7 +61,7 @@ export default function HeaderAuth() {
           href="/login"
           className="inline-flex items-center justify-center rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
         >
-          Login
+          {auth.status === "loading" ? "Loading..." : "Login"}
         </Link>
       )}
     </div>

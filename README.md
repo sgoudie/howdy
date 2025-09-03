@@ -4,7 +4,7 @@ Grow your mailing list from the stage.
 
 ### Initial MVP Functionality
 - Text a number with a keyword to your email. 
-- Emails and numbers are added to ConvertKit. 
+- Emails and numbers are added to Kit (ConvertKit). 
 - The subscriber is tagged with a custom tag that can be used for incentives. 
 
 ---
