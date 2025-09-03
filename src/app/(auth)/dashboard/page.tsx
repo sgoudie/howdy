@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   return (
     <div className="w-full">
       <div className="max-w-2xl mx-auto px-6">
-        <h1 className="text-2xl font-semibold mt-8">Welcome {hasFirstName ? (user.user_metadata as any).first_name : ""}</h1>
+        <h1 className="text-2xl font-semibold mt-8">Howdy {hasFirstName ? (user.user_metadata as any).first_name : "friend"} 👋</h1>
       </div>
       <div className="px-6 pb-8">
         <AddSubscriberForm />

@@ -7,12 +7,14 @@ export function AddKeywordForm() {
   const [state, formAction, isPending] = useActionState<AddKeywordResult, FormData>(addKeywordAction, { ok: true });
   const [clientError, setClientError] = useState<string | null>(null);
   const [value, setValue] = useState<string>("");
+  const [serverError, setServerError] = useState<string | null>(null);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const v = e.target.value;
     setValue(v.toUpperCase());
     if (/\s/.test(v)) setClientError("Labels cannot contain spaces.");
     else setClientError(null);
+    if (serverError) setServerError(null);
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -28,6 +30,9 @@ export function AddKeywordForm() {
     if (state && state.ok) {
       setValue("");
       setClientError(null);
+      setServerError(null);
+    } else if (state && !state.ok) {
+      setServerError(state.message);
     }
   }, [state]);
 
@@ -40,7 +45,7 @@ export function AddKeywordForm() {
           placeholder="keyword label"
           value={value}
           onChange={handleChange}
-          className="w-full max-w-xs rounded-lg border border-gray-300 bg-white/80 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+          className="w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
         />
         <button
           type="submit"
@@ -50,8 +55,8 @@ export function AddKeywordForm() {
           {isPending ? "Adding..." : "Add"}
         </button>
       </div>
-      {(clientError || (state && !state.ok)) && (
-        <div className="text-sm text-red-600">{clientError || (!state.ok ? state.message : "")}</div>
+      {(clientError || serverError) && (
+        <div className="text-sm text-red-600">{clientError || serverError}</div>
       )}
     </form>
   );

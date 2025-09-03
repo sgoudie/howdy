@@ -45,7 +45,7 @@ export default function SettingsIndex() {
   return (
     <div className="w-full">
       <div className="max-w-5xl mx-auto w-full px-6 py-8">
-        <div className="rounded-lg border bg-white p-6">
+        <div className="rounded-xl border border-gray-200 bg-white/50 dark:bg-black/20 shadow-sm p-6">
           <SettingsPageInner dataPromise={dataPromise} />
         </div>
       </div>

@@ -22,6 +22,7 @@ export function SettingsForm({ initialData }: {
   const [accountName, setAccountName] = useState<string>(initialData.accountName);
   const [convertkitApiKey, setConvertkitApiKey] = useState<string>(initialData.convertkitApiKey);
   const [convertkitTag, setConvertkitTag] = useState<string>(initialData.convertkitTag || "source-howdy");
+  const [showApiKey, setShowApiKey] = useState<boolean>(false);
 
   const [state, formAction, isPending] = useActionState<SaveSettingsResult, FormData>(saveSettingsAction, { ok: false, message: "" });
 
@@ -84,13 +85,23 @@ export function SettingsForm({ initialData }: {
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">ConvertKit API key</label>
-            <input
-              type="password"
-              value={convertkitApiKey}
-              name="convertkitApiKey"
-              onChange={(e) => setConvertkitApiKey(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white/80 dark:bg-black/30 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="relative">
+              <input
+                type={showApiKey ? "text" : "password"}
+                value={convertkitApiKey}
+                name="convertkitApiKey"
+                onChange={(e) => setConvertkitApiKey(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 bg-white/80 dark:bg-black/30 px-3 py-2 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                onClick={() => setShowApiKey((v) => !v)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md border border-gray-300 px-2 py-1 text-xs bg-white/70 dark:bg-black/30 hover:bg-white/90 dark:hover:bg-black/40"
+                aria-label={showApiKey ? "Hide API key" : "Show API key"}
+              >
+                {showApiKey ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">ConvertKit tag</label>

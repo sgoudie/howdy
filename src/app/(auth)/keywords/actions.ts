@@ -42,7 +42,11 @@ export async function addKeywordAction(_prev: AddKeywordResult | null, formData:
     .insert({ label: upper, account_id: account.id });
 
   if (insertErr) {
-    return { ok: false, message: insertErr.message || "Failed to add keyword." };
+    const code = (insertErr as any)?.code as string | undefined;
+    const raw = insertErr.message || "";
+    const isUnique = code === "23505" || /unique|duplicate/i.test(raw);
+    const friendly = isUnique ? "Keyword already exists. Keywords must be unique." : (raw || "Failed to add keyword.");
+    return { ok: false, message: friendly };
   }
 
   // Refresh the keywords page
