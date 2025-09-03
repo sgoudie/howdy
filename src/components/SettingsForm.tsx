@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useAccount } from "@/components/AccountProvider";
-import { saveSettingsAction, type SaveSettingsResult } from "@/app/settings/actions";
+import { saveSettingsAction, type SaveSettingsResult } from "@/app/(auth)/settings/actions";
 
 export function SettingsForm({ initialData }: {
   initialData: {

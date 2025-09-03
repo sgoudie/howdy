@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 type AuthState =
   | { status: "loading" }
@@ -11,6 +12,7 @@ type AuthState =
 
 export default function HeaderAuth() {
   const [auth, setAuth] = useState<AuthState>({ status: "loading" });
+  const router = useRouter();
 
   useEffect(() => {
     let mounted = true;
@@ -35,7 +37,11 @@ export default function HeaderAuth() {
   }, []);
 
   async function handleLogout() {
-    await supabase.auth.signOut();
+    try {
+      await fetch("/api/logout", { method: "POST" });
+    } finally {
+      router.replace("/login");
+    }
   }
 
   return (

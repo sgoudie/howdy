@@ -14,7 +14,7 @@ type SettingsData = {
 };
 
 async function loadSettings(): Promise<SettingsData> {
-  const supabase = getSupabaseServer();
+  const supabase = await getSupabaseServer();
   const { data: userRes } = await supabase.auth.getUser();
   const user = userRes.user;
   const email = user?.email ?? "";
@@ -40,15 +40,14 @@ async function loadSettings(): Promise<SettingsData> {
 }
 
 export default function SettingsIndex() {
-  // Server component: load data here and pass as props
-  // Next.js App Router treats this file as a Server Component by default
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const dataPromise = loadSettings();
 
   return (
-    <div className="max-w-5xl mx-auto w-full px-4 py-8">
-      <div className="rounded-lg border bg-white p-6">
-        <SettingsPageInner dataPromise={dataPromise} />
+    <div className="w-full">
+      <div className="max-w-5xl mx-auto w-full px-6 py-8">
+        <div className="rounded-lg border bg-white p-6">
+          <SettingsPageInner dataPromise={dataPromise} />
+        </div>
       </div>
     </div>
   );

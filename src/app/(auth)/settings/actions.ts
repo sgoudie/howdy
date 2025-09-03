@@ -1,13 +1,13 @@
 "use server";
 
-import { getSupabaseServer } from "@/lib/supabaseServer";
+import { getSupabaseActionClient } from "@/lib/supabaseServer";
 
 export type SaveSettingsResult =
   | { ok: true; message: string }
   | { ok: false; message: string };
 
 export async function saveSettingsAction(_prevState: SaveSettingsResult | null, formData: FormData): Promise<SaveSettingsResult> {
-  const supabase = getSupabaseServer();
+  const supabase = await getSupabaseActionClient();
 
   const {
     data: { user },
@@ -17,7 +17,6 @@ export async function saveSettingsAction(_prevState: SaveSettingsResult | null, 
     return { ok: false, message: userErr?.message || "Not authenticated." };
   }
 
-  // Update auth metadata
   const { error: updErr } = await supabase.auth.updateUser({
     data: {
       first_name: String(formData.get("firstName") || ""),
@@ -28,7 +27,6 @@ export async function saveSettingsAction(_prevState: SaveSettingsResult | null, 
     return { ok: false, message: updErr.message || "Failed to update profile." };
   }
 
-  // Update account row
   const { error: accErr } = await supabase
     .from("accounts")
     .update({

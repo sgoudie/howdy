@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import HeaderAuth from "@/components/HeaderAuth";
 import { AccountProvider } from "@/components/AccountProvider";
-import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,20 +28,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="min-h-screen flex flex-col">
-          <AccountProvider>
-            <header className="w-full p-4">
-              <div className="max-w-5xl mx-auto flex items-center justify-between">
-                <Link href="/dashboard" className="text-xl font-semibold hover:underline">
-                  Howdy
-                </Link>
-                <HeaderAuth />
-              </div>
-            </header>
-            <main className="flex-1">{children}</main>
-          </AccountProvider>
-          <footer className="w-full p-4 text-sm text-gray-500">Howdy v0.1.0</footer>
-        </div>
+        <AccountProvider>
+          {children}
+        </AccountProvider>
       </body>
     </html>
   );

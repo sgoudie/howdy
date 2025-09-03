@@ -6,18 +6,20 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function DashboardPage() {
-  const supabase = getSupabaseServer();
+  const supabase = await getSupabaseServer();
   const { data } = await supabase.auth.getUser();
   const user = data.user;
-  const hasFirstName = user && user.user_metadata && user.user_metadata.first_name;
+  const hasFirstName = user && user.user_metadata && (user.user_metadata as any).first_name;
   if (!user) redirect("/login");
 
   return (
     <div className="w-full">
-      <div className="max-w-2xl mx-auto px-4">
-        <h1 className="text-2xl font-semibold mt-8">Welcome {hasFirstName ? user.user_metadata.first_name : ""}</h1>
+      <div className="max-w-2xl mx-auto px-6">
+        <h1 className="text-2xl font-semibold mt-8">Welcome {hasFirstName ? (user.user_metadata as any).first_name : ""}</h1>
       </div>
-      <AddSubscriberForm />
+      <div className="px-6 pb-8">
+        <AddSubscriberForm />
+      </div>
     </div>
   );
 }
