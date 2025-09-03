@@ -38,6 +38,7 @@ export default function Sidebar() {
       </div>
       <nav className="flex-1 px-2 py-4 space-y-1">
         <NavItem href="/dashboard" label="Dashboard" />
+        <NavItem href="/keywords" label="Keywords" />
         <NavItem href="/settings" label="Settings" />
       </nav>
       <div className="mt-auto px-4 py-4 border-t space-y-2">
