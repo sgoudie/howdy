@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { getPublicEnv } from "@/lib/env";
+import { Hand } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type FormState =
   | { status: "idle" }
@@ -43,34 +47,38 @@ export default function LoginForm() {
   const isLoading = state.status === "loading";
 
   return (
-    <div className="flex w-full items-center justify-center py-16">
-      <div className="mx-auto w-full max-w-md rounded-xl border border-gray-200 bg-white/50 p-6 shadow-sm dark:bg-black/20">
-        <h2 className="mb-2 text-xl font-semibold">Login</h2>
-        <p className="mb-6 text-sm text-gray-600">We will send you a magic link.</p>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            type="email"
-            inputMode="email"
-            name="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="w-full rounded-lg border border-gray-300 bg-white/80 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-black/30"
-          />
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isLoading ? "Sending..." : "Send magic link"}
-          </button>
-        </form>
-        {state.status === "success" && (
-          <p className="mt-4 text-sm text-green-600">{state.message}</p>
-        )}
-        {state.status === "error" && <p className="mt-4 text-sm text-red-600">{state.message}</p>}
+    <div className={cn("flex flex-col gap-6")}> 
+      <form onSubmit={handleSubmit}>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col items-center gap-2">
+            <a href="#" className="flex flex-col items-center gap-2 font-medium">
+              <div className="flex size-8 items-center justify-center rounded-md">
+                <Hand className="size-6" />
+              </div>
+              <span className="sr-only">Howdy</span>
+            </a>
+            <h1 className="text-xl font-bold">Welcome to Howdy</h1>
+            <div className="text-center text-sm text-muted-foreground">We’ll send you a magic link.</div>
+          </div>
+          <div className="flex flex-col gap-6">
+            <div className="grid gap-3">
+              <label htmlFor="email" className="text-sm font-medium">Email</label>
+              <Input id="email" type="email" inputMode="email" autoComplete="email" required placeholder="e.g del.preston@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Sending..." : "Send magic link"}
+            </Button>
+          </div>
+        </div>
+      </form>
+      {state.status === "success" && (
+        <div className="text-muted-foreground text-center text-xs">{state.message}</div>
+      )}
+      {state.status === "error" && (
+        <div className="text-center text-xs text-red-600">{state.message}</div>
+      )}
+      <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+        By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
       </div>
     </div>
   );
