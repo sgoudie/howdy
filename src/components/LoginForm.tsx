@@ -24,6 +24,7 @@ export default function LoginForm() {
 
     setState({ status: "loading" });
     try {
+      console.log(pathname);
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
