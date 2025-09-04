@@ -4,7 +4,10 @@ import { useActionState, useEffect, useState } from "react";
 import { addKeywordAction, type AddKeywordResult } from "../actions";
 
 export function AddKeywordForm() {
-  const [state, formAction, isPending] = useActionState<AddKeywordResult, FormData>(addKeywordAction, { ok: true });
+  const [state, formAction, isPending] = useActionState<AddKeywordResult, FormData>(
+    addKeywordAction,
+    { ok: true },
+  );
   const [clientError, setClientError] = useState<string | null>(null);
   const [value, setValue] = useState<string>("");
   const [serverError, setServerError] = useState<string | null>(null);
@@ -45,12 +48,12 @@ export function AddKeywordForm() {
           placeholder="keyword label"
           value={value}
           onChange={handleChange}
-          className="w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+          className="w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm uppercase focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Adding..." : "Add"}
         </button>
@@ -61,5 +64,3 @@ export function AddKeywordForm() {
     </form>
   );
 }
-
-

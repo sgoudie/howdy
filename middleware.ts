@@ -14,10 +14,17 @@ export async function middleware(req: NextRequest) {
       get(name: string) {
         return req.cookies.get(name)?.value;
       },
-      set(name: string, value: string, options: { name?: string; value?: string; [key: string]: unknown } = {}) {
+      set(
+        name: string,
+        value: string,
+        options: { name?: string; value?: string; [key: string]: unknown } = {},
+      ) {
         res.cookies.set({ name, value, ...options });
       },
-      remove(name: string, options: { name?: string; value?: string; [key: string]: unknown } = {}) {
+      remove(
+        name: string,
+        options: { name?: string; value?: string; [key: string]: unknown } = {},
+      ) {
         res.cookies.set({ name, value: "", ...options });
       },
     },
@@ -31,5 +38,3 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: ["/(.*)"],
 };
-
-

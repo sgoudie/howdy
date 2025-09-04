@@ -52,13 +52,18 @@ export async function ensureTagByName(tagName: string, apiKey: string): Promise<
       },
     });
     try {
-      const dbg = await listRes.clone().json().catch(() => ({} as { tags?: unknown[] }));
+      const dbg = await listRes
+        .clone()
+        .json()
+        .catch(() => ({}) as { tags?: unknown[] });
       const tagsCount = Array.isArray(dbg.tags) ? dbg.tags.length : undefined;
       console.log("Kit:list tags status", listRes.status, { tagsCount });
     } catch {}
     const listJson = (await listRes.json().catch(() => ({}))) as ListTagsJson;
     if (listRes.ok && Array.isArray(listJson.tags)) {
-      const found = listJson.tags.find((t) => String(t?.name ?? "").toLowerCase() === name.toLowerCase());
+      const found = listJson.tags.find(
+        (t) => String(t?.name ?? "").toLowerCase() === name.toLowerCase(),
+      );
       if (found?.id) {
         return { ok: true, status: 200, id: String(found.id), name: String(found.name ?? name) };
       }
@@ -74,14 +79,18 @@ export async function ensureTagByName(tagName: string, apiKey: string): Promise<
       body: JSON.stringify({ name }),
     });
     try {
-      const dbg = await createRes.clone().json().catch(() => ({} as Record<string, unknown>));
+      const dbg = await createRes
+        .clone()
+        .json()
+        .catch(() => ({}) as Record<string, unknown>);
       console.log("Kit:create tag status", createRes.status, { body: JSON.stringify(dbg) });
     } catch {}
     const createJson = (await createRes.json().catch(() => ({}))) as CreateTagJson;
     if (!createRes.ok) {
-      const msg = Array.isArray(createJson.errors) && createJson.errors[0]
-        ? createJson.errors[0]
-        : createJson.message || "Failed to create tag";
+      const msg =
+        Array.isArray(createJson.errors) && createJson.errors[0]
+          ? createJson.errors[0]
+          : createJson.message || "Failed to create tag";
       return { ok: false, status: createRes.status || 500, error: msg };
     }
     const created = createJson.tag;
@@ -108,7 +117,13 @@ function slugifyFieldKey(input: string): string {
     .replace(/^_+|_+$/g, "");
 }
 
-export async function ensureCustomFieldByName(fieldName: string, apiKey: string): Promise<{ ok: true; id: string; name: string; key?: string } | { ok: false; status: number; error: string }> {
+export async function ensureCustomFieldByName(
+  fieldName: string,
+  apiKey: string,
+): Promise<
+  | { ok: true; id: string; name: string; key?: string }
+  | { ok: false; status: number; error: string }
+> {
   const name = (fieldName || "").trim();
   if (!name) {
     return { ok: false, status: 400, error: "Field name is required" } as const;
@@ -120,7 +135,10 @@ export async function ensureCustomFieldByName(fieldName: string, apiKey: string)
       headers: { "Content-Type": "application/json", "X-Kit-Api-Key": apiKey },
     });
     try {
-      const dbg = await listRes.clone().json().catch(() => ({} as { custom_fields?: unknown[] }));
+      const dbg = await listRes
+        .clone()
+        .json()
+        .catch(() => ({}) as { custom_fields?: unknown[] });
       const count = Array.isArray(dbg.custom_fields) ? dbg.custom_fields.length : undefined;
       console.log("Kit:list custom fields status", listRes.status, { count });
     } catch {}
@@ -131,7 +149,12 @@ export async function ensureCustomFieldByName(fieldName: string, apiKey: string)
         return n === name.toLowerCase();
       });
       if (found?.id) {
-        return { ok: true, id: String(found.id), name: String(found.label ?? found.name ?? name), key: found.key ? String(found.key) : undefined } as const;
+        return {
+          ok: true,
+          id: String(found.id),
+          name: String(found.label ?? found.name ?? name),
+          key: found.key ? String(found.key) : undefined,
+        } as const;
       }
     }
 
@@ -142,19 +165,30 @@ export async function ensureCustomFieldByName(fieldName: string, apiKey: string)
       body: JSON.stringify({ name, label: name, key: slugifyFieldKey(name), field_type: "text" }),
     });
     try {
-      const dbg = await createRes.clone().json().catch(() => ({} as Record<string, unknown>));
-      console.log("Kit:create custom field status", createRes.status, { body: JSON.stringify(dbg) });
+      const dbg = await createRes
+        .clone()
+        .json()
+        .catch(() => ({}) as Record<string, unknown>);
+      console.log("Kit:create custom field status", createRes.status, {
+        body: JSON.stringify(dbg),
+      });
     } catch {}
     const createJson = (await createRes.json().catch(() => ({}))) as CreateFieldJson;
     if (!createRes.ok) {
-      const msg = Array.isArray(createJson.errors) && createJson.errors[0]
-        ? createJson.errors[0]
-        : createJson.message || "Failed to create custom field";
+      const msg =
+        Array.isArray(createJson.errors) && createJson.errors[0]
+          ? createJson.errors[0]
+          : createJson.message || "Failed to create custom field";
       return { ok: false, status: createRes.status || 500, error: msg } as const;
     }
     const created = createJson.custom_field;
     if (created?.id) {
-      return { ok: true, id: String(created.id), name: String(created.label ?? created.name ?? name), key: created.key ? String(created.key) : undefined } as const;
+      return {
+        ok: true,
+        id: String(created.id),
+        name: String(created.label ?? created.name ?? name),
+        key: created.key ? String(created.key) : undefined,
+      } as const;
     }
     return { ok: false, status: 500, error: "Unexpected create custom field response" } as const;
   } catch (e) {
@@ -163,7 +197,12 @@ export async function ensureCustomFieldByName(fieldName: string, apiKey: string)
   }
 }
 
-export async function subscribeEmailToTag(email: string, tagName: string | undefined, apiKey: string, phone?: string | null): Promise<SubscribeResult> {
+export async function subscribeEmailToTag(
+  email: string,
+  tagName: string | undefined,
+  apiKey: string,
+  phone?: string | null,
+): Promise<SubscribeResult> {
   const trimmedEmail = (email || "").trim();
   if (!trimmedEmail || !trimmedEmail.includes("@")) {
     return { ok: false, status: 400, error: "A valid email is required." };
@@ -209,12 +248,18 @@ export async function subscribeEmailToTag(email: string, tagName: string | undef
       // If Kit upsert ignores fields on 200 case (existing), ensure via explicit update
       if (res.ok && res.status === 200 && phone && phoneFieldKey) {
         // try update immediately so the field is set deterministically
-        const createdOrLookup = await fetch(`https://api.kit.com/v4/subscribers?email_address=${encodeURIComponent(trimmedEmail)}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json", "X-Kit-Api-Key": apiKey },
-        });
+        const createdOrLookup = await fetch(
+          `https://api.kit.com/v4/subscribers?email_address=${encodeURIComponent(trimmedEmail)}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json", "X-Kit-Api-Key": apiKey },
+          },
+        );
         const lookJson = (await createdOrLookup.json().catch(() => ({}))) as LookupSubscribersJson;
-        const sid = Array.isArray(lookJson.subscribers) && lookJson.subscribers[0]?.id ? String(lookJson.subscribers[0].id) : undefined;
+        const sid =
+          Array.isArray(lookJson.subscribers) && lookJson.subscribers[0]?.id
+            ? String(lookJson.subscribers[0].id)
+            : undefined;
         if (sid) {
           await fetch(`https://api.kit.com/v4/subscribers/${encodeURIComponent(sid)}`, {
             method: "PUT",
@@ -246,24 +291,25 @@ export async function subscribeEmailToTag(email: string, tagName: string | undef
               "Content-Type": "application/json",
               "X-Kit-Api-Key": apiKey,
             },
-          }
+          },
         );
         const lookupJson = (await lookup.json().catch(() => ({}))) as LookupSubscribersJson;
-        if (
-          lookup.ok &&
-          Array.isArray(lookupJson.subscribers) &&
-          lookupJson.subscribers[0]?.id
-        ) {
+        if (lookup.ok && Array.isArray(lookupJson.subscribers) && lookupJson.subscribers[0]?.id) {
           return { ok: true, id: String(lookupJson.subscribers[0].id) };
         }
       }
 
       const msg =
         typeof body === "object"
-          ? (Array.isArray(body.errors) && body.errors[0]) || body.message || "Failed to create subscriber"
+          ? (Array.isArray(body.errors) && body.errors[0]) ||
+            body.message ||
+            "Failed to create subscriber"
           : body || "Failed to create subscriber";
       try {
-        console.log("Kit:create subscriber error body", typeof body === "string" ? body : JSON.stringify(body));
+        console.log(
+          "Kit:create subscriber error body",
+          typeof body === "string" ? body : JSON.stringify(body),
+        );
       } catch {
         console.log("Kit:create subscriber error body (non-serializable)");
       }
@@ -274,14 +320,16 @@ export async function subscribeEmailToTag(email: string, tagName: string | undef
     }
   }
 
-  async function maybeUpdatePhone(subscriberId: string): Promise<SubscribeResult | { ok: true; status: number }> {
+  async function maybeUpdatePhone(
+    subscriberId: string,
+  ): Promise<SubscribeResult | { ok: true; status: number }> {
     if (!phone) return { ok: true, status: 200 };
     try {
       const url = `https://api.kit.com/v4/subscribers/${encodeURIComponent(subscriberId)}`;
       // Ensure field exists for updates too
       const ensuredField = await ensureCustomFieldByName("Phone", apiKey);
       // In practice, Kit writes the custom field value under the account-defined key ("phone" per your logs)
-      const fieldKey = ensuredField.ok ? (ensuredField.key || ensuredField.name || "Phone") : "Phone";
+      const fieldKey = ensuredField.ok ? ensuredField.key || ensuredField.name || "Phone" : "Phone";
       const res = await fetch(url, {
         method: "PUT",
         headers: {
@@ -292,14 +340,20 @@ export async function subscribeEmailToTag(email: string, tagName: string | undef
       });
       console.log("Kit:update fields payload", { fieldKey, phone });
       try {
-        const dbg = await res.clone().json().catch(() => ({}));
-        console.log("Kit:update subscriber fields status", res.status, { body: JSON.stringify(dbg) });
+        const dbg = await res
+          .clone()
+          .json()
+          .catch(() => ({}));
+        console.log("Kit:update subscriber fields status", res.status, {
+          body: JSON.stringify(dbg),
+        });
       } catch {}
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as KitErrorJson | Record<string, never>;
-        const msg = Array.isArray((body as KitErrorJson).errors) && (body as KitErrorJson).errors![0]
-          ? (body as KitErrorJson).errors![0]
-          : (body as KitErrorJson).message || "Failed to update phone";
+        const msg =
+          Array.isArray((body as KitErrorJson).errors) && (body as KitErrorJson).errors![0]
+            ? (body as KitErrorJson).errors![0]
+            : (body as KitErrorJson).message || "Failed to update phone";
         return { ok: false, status: res.status, error: String(msg) };
       }
       return { ok: true, status: res.status };
@@ -312,7 +366,7 @@ export async function subscribeEmailToTag(email: string, tagName: string | undef
   async function tagSubscriberId(subscriberId: string): Promise<SubscribeResult> {
     try {
       const tagUrl = `https://api.kit.com/v4/tags/${encodeURIComponent(tagIdToUse)}/subscribers/${encodeURIComponent(
-        subscriberId
+        subscriberId,
       )}`;
       const res = await fetch(tagUrl, {
         method: "POST",
@@ -323,9 +377,10 @@ export async function subscribeEmailToTag(email: string, tagName: string | undef
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as KitErrorJson | Record<string, never>;
-        const msg = Array.isArray((body as KitErrorJson).errors) && (body as KitErrorJson).errors![0]
-          ? (body as KitErrorJson).errors![0]
-          : (body as KitErrorJson).message || "Failed to tag subscriber";
+        const msg =
+          Array.isArray((body as KitErrorJson).errors) && (body as KitErrorJson).errors![0]
+            ? (body as KitErrorJson).errors![0]
+            : (body as KitErrorJson).message || "Failed to tag subscriber";
         return { ok: false, status: res.status, error: String(msg) };
       }
       return { ok: true, status: res.status, data: undefined };
@@ -340,15 +395,19 @@ export async function subscribeEmailToTag(email: string, tagName: string | undef
     return { ok: false, status: created.status, error: created.error };
   }
   const upd = await maybeUpdatePhone(created.id);
-  if (!(typeof upd === 'object' && 'ok' in upd) || !upd.ok) {
+  if (!(typeof upd === "object" && "ok" in upd) || !upd.ok) {
     // Even if phone update fails, proceed to tag but surface the error if tagging also fails
     const tagRes = await tagSubscriberId(created.id);
     if (!tagRes.ok) return tagRes;
-    const status = typeof (upd as { status?: number }).status === 'number' ? (upd as { status?: number }).status! : 500;
-    const error = typeof (upd as { error?: string }).error === 'string' ? (upd as { error?: string }).error! : "Failed to update phone";
+    const status =
+      typeof (upd as { status?: number }).status === "number"
+        ? (upd as { status?: number }).status!
+        : 500;
+    const error =
+      typeof (upd as { error?: string }).error === "string"
+        ? (upd as { error?: string }).error!
+        : "Failed to update phone";
     return { ok: false, status, error };
   }
   return await tagSubscriberId(created.id);
 }
-
-

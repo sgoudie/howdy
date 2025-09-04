@@ -3,8 +3,19 @@
 import { useActionState, useEffect } from "react";
 import { deleteKeywordAction, type DeleteKeywordResult } from "../actions";
 
-export function DeleteKeywordForm({ id, onError, onSuccess }: { id: string; onError?: (msg: string) => void; onSuccess?: () => void }) {
-  const [state, formAction, isPending] = useActionState<DeleteKeywordResult, FormData>(deleteKeywordAction, { ok: true });
+export function DeleteKeywordForm({
+  id,
+  onError,
+  onSuccess,
+}: {
+  id: string;
+  onError?: (msg: string) => void;
+  onSuccess?: () => void;
+}) {
+  const [state, formAction, isPending] = useActionState<DeleteKeywordResult, FormData>(
+    deleteKeywordAction,
+    { ok: true },
+  );
 
   useEffect(() => {
     if (!state) return;
@@ -28,5 +39,3 @@ export function DeleteKeywordForm({ id, onError, onSuccess }: { id: string; onEr
     </form>
   );
 }
-
-

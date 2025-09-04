@@ -29,14 +29,19 @@ export async function getSupabaseActionClient() {
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       get: (name: string) => cookieStore.get(name)?.value,
-      set: (name: string, value: string, options: { name?: string; value?: string; [key: string]: unknown } = {}) => {
+      set: (
+        name: string,
+        value: string,
+        options: { name?: string; value?: string; [key: string]: unknown } = {},
+      ) => {
         cookieStore.set({ name, value, ...(options as Record<string, unknown>) });
       },
-      remove: (name: string, options: { name?: string; value?: string; [key: string]: unknown } = {}) => {
+      remove: (
+        name: string,
+        options: { name?: string; value?: string; [key: string]: unknown } = {},
+      ) => {
         cookieStore.set({ name, value: "", ...(options as Record<string, unknown>) });
       },
     },
   });
 }
-
-

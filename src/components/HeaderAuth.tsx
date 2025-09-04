@@ -48,7 +48,7 @@ export default function HeaderAuth() {
     <div className="flex items-center gap-3">
       {auth.status === "authenticated" ? (
         <>
-          <span className="text-sm text-gray-600 hidden sm:inline">{auth.email}</span>
+          <span className="hidden text-sm text-gray-600 sm:inline">{auth.email}</span>
           <Link
             href="/settings"
             className="inline-flex items-center justify-center rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
@@ -73,5 +73,3 @@ export default function HeaderAuth() {
     </div>
   );
 }
-
-

@@ -12,5 +12,3 @@ if (!supabaseAnonKey) {
 }
 
 export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
-
-

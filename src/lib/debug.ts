@@ -12,5 +12,3 @@ export function debugLog(...args: unknown[]) {
     console.debug("[Howdy]", ...args);
   }
 }
-
-

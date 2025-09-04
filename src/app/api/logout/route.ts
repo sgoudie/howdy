@@ -14,5 +14,3 @@ export async function POST() {
     return NextResponse.json({ ok: false, message }, { status: 500 });
   }
 }
-
-

@@ -2,11 +2,12 @@
 
 import { getSupabaseActionClient } from "@/lib/supabaseServer";
 
-export type SaveSettingsResult =
-  | { ok: true; message: string }
-  | { ok: false; message: string };
+export type SaveSettingsResult = { ok: true; message: string } | { ok: false; message: string };
 
-export async function saveSettingsAction(_prevState: SaveSettingsResult | null, formData: FormData): Promise<SaveSettingsResult> {
+export async function saveSettingsAction(
+  _prevState: SaveSettingsResult | null,
+  formData: FormData,
+): Promise<SaveSettingsResult> {
   const supabase = await getSupabaseActionClient();
 
   const {
@@ -42,5 +43,3 @@ export async function saveSettingsAction(_prevState: SaveSettingsResult | null, 
 
   return { ok: true, message: "Settings saved." };
 }
-
-

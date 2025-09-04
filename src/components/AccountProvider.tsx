@@ -83,14 +83,15 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const value = useMemo<AccountContextValue>(() => ({
-    account,
-    status,
-    error,
-    refresh: load,
-  }), [account, status, error]);
+  const value = useMemo<AccountContextValue>(
+    () => ({
+      account,
+      status,
+      error,
+      refresh: load,
+    }),
+    [account, status, error],
+  );
 
   return <AccountContext.Provider value={value}>{children}</AccountContext.Provider>;
 }
-
-

@@ -14,7 +14,10 @@ export async function POST(request: Request) {
     const email = typeof body?.email === "string" ? body.email : "";
     const phone = typeof body?.phone === "string" ? body.phone : undefined;
     if (!email) {
-      return NextResponse.json({ ok: false, status: 400, error: "Email is required." }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, status: 400, error: "Email is required." },
+        { status: 400 },
+      );
     }
 
     // First try cookies-based auth
@@ -26,8 +29,11 @@ export async function POST(request: Request) {
 
     // Fallback to Authorization header Bearer token (for non-browser callers)
     if (!userId) {
-      const authHeader = request.headers.get("authorization") || request.headers.get("Authorization");
-      const token = authHeader?.toLowerCase().startsWith("bearer ") ? authHeader.slice(7) : undefined;
+      const authHeader =
+        request.headers.get("authorization") || request.headers.get("Authorization");
+      const token = authHeader?.toLowerCase().startsWith("bearer ")
+        ? authHeader.slice(7)
+        : undefined;
       if (token) {
         const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
         const supaAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -42,7 +48,10 @@ export async function POST(request: Request) {
 
     if (!userId) {
       console.error("/api/subscribers: not authenticated (no cookie user or bearer token)");
-      return NextResponse.json({ ok: false, status: 401, error: "Not authenticated." }, { status: 401 });
+      return NextResponse.json(
+        { ok: false, status: 401, error: "Not authenticated." },
+        { status: 401 },
+      );
     }
 
     const result = await subscribeWithAccount({ email, phone, db: dbClient, userId });
@@ -55,7 +64,7 @@ export async function POST(request: Request) {
           status: result.status || 500,
           error: result.error,
         },
-        { status: result.status || 500 }
+        { status: result.status || 500 },
       );
     }
 
@@ -63,11 +72,6 @@ export async function POST(request: Request) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Server error";
     console.error("/api/subscribers: unexpected error", error);
-    return NextResponse.json(
-      { ok: false, status: 500, error: message },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: false, status: 500, error: message }, { status: 500 });
   }
 }
-
-

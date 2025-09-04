@@ -21,14 +21,16 @@ export default async function DashboardPage() {
 
   return (
     <div className="w-full">
-      <div className="max-w-2xl mx-auto px-6">
-        <h1 className="text-2xl font-semibold mt-8">Howdy {hasFirstName ? String(meta.first_name) : "friend"} 👋</h1>
+      <div className="mx-auto max-w-2xl px-6">
+        <h1 className="mt-8 text-2xl font-semibold">
+          Howdy {hasFirstName ? String(meta.first_name) : "friend"} 👋
+        </h1>
       </div>
       <div className="px-6 pb-8">
-        <AddSubscriberForm initialTagLabel={(acc?.convertkit_howdy_tag_label as string | null) || undefined} />
+        <AddSubscriberForm
+          initialTagLabel={(acc?.convertkit_howdy_tag_label as string | null) || undefined}
+        />
       </div>
     </div>
   );
 }
-
-

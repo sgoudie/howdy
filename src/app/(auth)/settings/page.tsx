@@ -44,10 +44,8 @@ export default function SettingsIndex() {
 
   return (
     <div className="w-full">
-      <div className="max-w-5xl mx-auto w-full px-6 py-8">
-        <div className="rounded-xl border border-gray-200 bg-white/50 dark:bg-black/20 shadow-sm p-6">
-          <SettingsPageInner dataPromise={dataPromise} />
-        </div>
+      <div className="mx-auto w-full max-w-5xl px-8 py-8">
+        <SettingsPageInner dataPromise={dataPromise} />
       </div>
     </div>
   );
@@ -57,5 +55,3 @@ async function SettingsPageInner({ dataPromise }: { dataPromise: Promise<Setting
   const data = await dataPromise;
   return <SettingsForm initialData={data} />;
 }
-
-

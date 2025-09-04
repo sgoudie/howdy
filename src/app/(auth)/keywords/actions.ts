@@ -3,11 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { getSupabaseActionClient } from "@/lib/supabaseServer";
 
-export type AddKeywordResult =
-  | { ok: true }
-  | { ok: false; message: string };
+export type AddKeywordResult = { ok: true } | { ok: false; message: string };
 
-export async function addKeywordAction(_prev: AddKeywordResult | null, formData: FormData): Promise<AddKeywordResult> {
+export async function addKeywordAction(
+  _prev: AddKeywordResult | null,
+  formData: FormData,
+): Promise<AddKeywordResult> {
   const label = String(formData.get("label") || "").trim();
   if (!label) return { ok: false, message: "Please enter a label." };
   if (/\s/.test(label)) {
@@ -45,7 +46,9 @@ export async function addKeywordAction(_prev: AddKeywordResult | null, formData:
     const code = (insertErr as { code?: string } | null | undefined)?.code;
     const raw = insertErr.message || "";
     const isUnique = code === "23505" || /unique|duplicate/i.test(raw);
-    const friendly = isUnique ? "Keyword already exists. Keywords must be unique." : (raw || "Failed to add keyword.");
+    const friendly = isUnique
+      ? "Keyword already exists. Keywords must be unique."
+      : raw || "Failed to add keyword.";
     return { ok: false, message: friendly };
   }
 
@@ -54,11 +57,12 @@ export async function addKeywordAction(_prev: AddKeywordResult | null, formData:
   return { ok: true };
 }
 
-export type DeleteKeywordResult =
-  | { ok: true }
-  | { ok: false; message: string };
+export type DeleteKeywordResult = { ok: true } | { ok: false; message: string };
 
-export async function deleteKeywordAction(_prev: DeleteKeywordResult | null, formData: FormData): Promise<DeleteKeywordResult> {
+export async function deleteKeywordAction(
+  _prev: DeleteKeywordResult | null,
+  formData: FormData,
+): Promise<DeleteKeywordResult> {
   const id = String(formData.get("id") || "").trim();
   if (!id) return { ok: false, message: "Missing keyword id." };
 
@@ -99,5 +103,3 @@ export async function deleteKeywordAction(_prev: DeleteKeywordResult | null, for
   revalidatePath("/keywords");
   return { ok: true };
 }
-
-

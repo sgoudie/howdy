@@ -14,7 +14,10 @@ export type Account = {
  * - Returns existing account if present
  * - Otherwise creates a new default account for the user
  */
-export async function ensureAccountForUser(userId: string, client?: SupabaseClient): Promise<Account> {
+export async function ensureAccountForUser(
+  userId: string,
+  client?: SupabaseClient,
+): Promise<Account> {
   const db = client || supabase;
   // Try to find an existing account
   const { data: found, error: findError } = await db
@@ -53,5 +56,3 @@ export async function ensureAccountForUser(userId: string, client?: SupabaseClie
 
   return created as Account;
 }
-
-

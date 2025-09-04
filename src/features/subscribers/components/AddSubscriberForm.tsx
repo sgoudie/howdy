@@ -41,7 +41,9 @@ export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel
         signal: controller.signal,
       }).finally(() => clearTimeout(timeoutId));
       console.log("AddSubscriberForm: response", res.status);
-      const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({}) as { ok?: boolean; error?: string });
+      const data: { ok?: boolean; error?: string } = await res
+        .json()
+        .catch(() => ({}) as { ok?: boolean; error?: string });
 
       if (!res.ok || data?.ok === false) {
         const status = res.status;
@@ -49,9 +51,11 @@ export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel
 
         let friendly = "Failed to subscribe.";
         if (status === 400) friendly = serverError || "Please enter a valid email address.";
-        else if (status === 401 || status === 403) friendly = "Not authenticated. Please log in and try again.";
+        else if (status === 401 || status === 403)
+          friendly = "Not authenticated. Please log in and try again.";
         else if (status === 404) friendly = "Tag not found or not accessible.";
-        else if (status === 422) friendly = serverError || "Validation failed. Please check the email.";
+        else if (status === 422)
+          friendly = serverError || "Validation failed. Please check the email.";
         else if (status >= 500) friendly = serverError || "Server error. Please try again shortly.";
 
         // Log detailed diagnostics for developers
@@ -78,11 +82,16 @@ export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel
   const isLoading = state.status === "loading";
 
   return (
-    <div className="w-full py-16 flex items-center justify-center">
-      <div className="w-full max-w-md mx-auto rounded-xl border border-gray-200 bg-white/50 dark:bg-black/20 shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-2">Quick add subscriber</h2>
-        <p className="text-sm text-gray-600 mb-6">
-          Enter an email and optionally a phone number. We&apos;ll add it to your Kit account (tagged as <code className="px-1 rounded bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">{tagToShow}</code>)
+    <div className="flex w-full items-center justify-center py-16">
+      <div className="mx-auto w-full max-w-md rounded-xl border border-gray-200 bg-white/50 p-6 shadow-sm dark:bg-black/20">
+        <h2 className="mb-2 text-xl font-semibold">Quick add subscriber</h2>
+        <p className="mb-6 text-sm text-gray-600">
+          Enter an email and optionally a phone number. We&apos;ll add it to your Kit account
+          (tagged as{" "}
+          <code className="rounded bg-gray-100 px-1 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
+            {tagToShow}
+          </code>
+          )
         </p>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
@@ -94,7 +103,7 @@ export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full rounded-lg border border-gray-300 bg-white/80 dark:bg-black/30 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg border border-gray-300 bg-white/80 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-black/30"
           />
           <input
             type="tel"
@@ -102,13 +111,13 @@ export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="phone number (optional)"
-            className="w-full rounded-lg border border-gray-300 bg-white/80 dark:bg-black/30 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg border border-gray-300 bg-white/80 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-black/30"
           />
           <button
             type="submit"
             disabled={isLoading}
             onClick={() => console.log("AddSubscriberForm: submit button clicked")}
-            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed w-full"
+            className="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isLoading ? "Subscribing..." : "Add Subscriber"}
           </button>
@@ -116,12 +125,8 @@ export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel
         {state.status === "success" && (
           <p className="mt-4 text-sm text-green-600">{state.message}</p>
         )}
-        {state.status === "error" && (
-          <p className="mt-4 text-sm text-red-600">{state.message}</p>
-        )}
+        {state.status === "error" && <p className="mt-4 text-sm text-red-600">{state.message}</p>}
       </div>
     </div>
   );
 }
-
-

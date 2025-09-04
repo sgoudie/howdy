@@ -2,9 +2,9 @@ import Link from "next/link";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-screen flex-col">
       <header className="w-full p-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
           <Link href="/dashboard" className="text-xl font-semibold hover:underline">
             Howdy
           </Link>
@@ -16,5 +16,3 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
     </div>
   );
 }
-
-

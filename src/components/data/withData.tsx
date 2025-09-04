@@ -10,7 +10,7 @@ export type LoaderState<T> =
   | { status: "ready"; data: T };
 
 export function withUserData<UserShape, P extends { user: UserShape }>(
-  Wrapped: (props: Omit<P, "user"> & { user: UserShape }) => React.ReactElement
+  Wrapped: (props: Omit<P, "user"> & { user: UserShape }) => React.ReactElement,
 ) {
   return function UserDataWrapper(props: Omit<P, "user">) {
     const [state, setState] = useState<LoaderState<UserShape>>({ status: "loading" });
@@ -23,7 +23,10 @@ export function withUserData<UserShape, P extends { user: UserShape }>(
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
           if (mounted && state.status === "loading") {
-            setState({ status: "error", message: "Profile could not be loaded. Please refresh the page." });
+            setState({
+              status: "error",
+              message: "Profile could not be loaded. Please refresh the page.",
+            });
           }
         }, 6000);
       };
@@ -34,7 +37,10 @@ export function withUserData<UserShape, P extends { user: UserShape }>(
         if (!mounted) return;
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         if (error || !data.user) {
-          setState({ status: "error", message: "Profile could not be loaded. Please refresh the page." });
+          setState({
+            status: "error",
+            message: "Profile could not be loaded. Please refresh the page.",
+          });
           return;
         }
         lastUserIdRef.current = data.user.id;
@@ -66,7 +72,7 @@ export function withUserData<UserShape, P extends { user: UserShape }>(
 }
 
 export function withAccountData<AccountShape, P extends { account: AccountShape }>(
-  Wrapped: (props: Omit<P, "account"> & { account: AccountShape }) => React.ReactElement
+  Wrapped: (props: Omit<P, "account"> & { account: AccountShape }) => React.ReactElement,
 ) {
   return function AccountDataWrapper(props: Omit<P, "account">) {
     const [state, setState] = useState<LoaderState<AccountShape>>({ status: "loading" });
@@ -85,7 +91,10 @@ export function withAccountData<AccountShape, P extends { account: AccountShape 
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
           if (mounted && reqId.current === current) {
-            setState({ status: "error", message: "Account could not be loaded. Please refresh the page." });
+            setState({
+              status: "error",
+              message: "Account could not be loaded. Please refresh the page.",
+            });
           }
         }, 6000);
         debugLog("load account for", userId);
@@ -96,7 +105,11 @@ export function withAccountData<AccountShape, P extends { account: AccountShape 
             .eq("user_id", userId)
             .limit(1)
             .maybeSingle();
-          debugLog("account load completed", { mounted, currentReq: reqId.current, expectedReq: current });
+          debugLog("account load completed", {
+            mounted,
+            currentReq: reqId.current,
+            expectedReq: current,
+          });
           if (!mounted || reqId.current !== current) {
             debugLog("account load ignored - component unmounted or stale request");
             return;
@@ -104,7 +117,10 @@ export function withAccountData<AccountShape, P extends { account: AccountShape 
           if (timeoutRef.current) clearTimeout(timeoutRef.current);
           if (error || !data) {
             debugLog("account load error", error, data);
-            setState({ status: "error", message: error?.message || "Account could not be loaded. Please refresh the page." });
+            setState({
+              status: "error",
+              message: error?.message || "Account could not be loaded. Please refresh the page.",
+            });
           } else {
             debugLog("account loaded successfully", data);
             debugLog("setting state to ready with data:", data);
@@ -114,7 +130,10 @@ export function withAccountData<AccountShape, P extends { account: AccountShape 
           if (!mounted || reqId.current !== current) return;
           if (timeoutRef.current) clearTimeout(timeoutRef.current);
           debugLog("account load exception", err);
-          setState({ status: "error", message: "Account could not be loaded. Please refresh the page." });
+          setState({
+            status: "error",
+            message: "Account could not be loaded. Please refresh the page.",
+          });
         }
       };
 
@@ -152,5 +171,3 @@ export function withAccountData<AccountShape, P extends { account: AccountShape 
     return <Wrapped {...(props as Omit<P, "account">)} account={state.data} />;
   };
 }
-
-

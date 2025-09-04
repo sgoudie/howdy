@@ -43,10 +43,10 @@ export default function LoginForm() {
   const isLoading = state.status === "loading";
 
   return (
-    <div className="w-full py-16 flex items-center justify-center">
-      <div className="w-full max-w-md mx-auto rounded-xl border border-gray-200 bg-white/50 dark:bg-black/20 shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-2">Login</h2>
-        <p className="text-sm text-gray-600 mb-6">We will send you a magic link.</p>
+    <div className="flex w-full items-center justify-center py-16">
+      <div className="mx-auto w-full max-w-md rounded-xl border border-gray-200 bg-white/50 p-6 shadow-sm dark:bg-black/20">
+        <h2 className="mb-2 text-xl font-semibold">Login</h2>
+        <p className="mb-6 text-sm text-gray-600">We will send you a magic link.</p>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="email"
@@ -57,12 +57,12 @@ export default function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full rounded-lg border border-gray-300 bg-white/80 dark:bg-black/30 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg border border-gray-300 bg-white/80 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-black/30"
           />
           <button
             type="submit"
             disabled={isLoading}
-            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed w-full"
+            className="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isLoading ? "Sending..." : "Send magic link"}
           </button>
@@ -70,12 +70,8 @@ export default function LoginForm() {
         {state.status === "success" && (
           <p className="mt-4 text-sm text-green-600">{state.message}</p>
         )}
-        {state.status === "error" && (
-          <p className="mt-4 text-sm text-red-600">{state.message}</p>
-        )}
+        {state.status === "error" && <p className="mt-4 text-sm text-red-600">{state.message}</p>}
       </div>
     </div>
   );
 }
-
-

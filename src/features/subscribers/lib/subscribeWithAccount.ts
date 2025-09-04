@@ -13,7 +13,13 @@ export type SubscribeOutcome =
   | { ok: true; status: number }
   | { ok: false; status: number; error: string };
 
-export async function subscribeWithAccount({ email, phone, userJwt, db, userId: providedUserId }: SubscribeInput): Promise<SubscribeOutcome> {
+export async function subscribeWithAccount({
+  email,
+  phone,
+  userJwt,
+  db,
+  userId: providedUserId,
+}: SubscribeInput): Promise<SubscribeOutcome> {
   try {
     let dbClient: SupabaseClient;
     if (db) {
@@ -59,7 +65,12 @@ export async function subscribeWithAccount({ email, phone, userJwt, db, userId: 
     // Note: phone reserved for future use with Kit if supported
     const result = await subscribeEmailToTag(email, tagName, apiKey, phone || undefined);
     if (!result.ok) {
-      console.error("subscribeWithAccount: ConvertKit subscribe failed", { status: result.status, error: result.error, email, tagName });
+      console.error("subscribeWithAccount: ConvertKit subscribe failed", {
+        status: result.status,
+        error: result.error,
+        email,
+        tagName,
+      });
       return { ok: false, status: result.status, error: result.error };
     }
 
@@ -70,5 +81,3 @@ export async function subscribeWithAccount({ email, phone, userJwt, db, userId: 
     return { ok: false, status: 500, error: m };
   }
 }
-
-
