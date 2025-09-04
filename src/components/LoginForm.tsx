@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { getServerEnv } from "@/lib/env";
 
 type FormState =
   | { status: "idle" }
@@ -23,11 +22,11 @@ export default function LoginForm() {
 
     setState({ status: "loading" });
     try {
-      const { APP_URL } = getServerEnv();
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== "undefined" ? window.location.origin : "");
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${APP_URL}/auth/callback`,
+          emailRedirectTo: `${appUrl}/auth/callback`,
         },
       });
       if (error) {
