@@ -4,6 +4,7 @@ import { Slot } from "@radix-ui/react-slot";
 import {
   Controller,
   ControllerProps,
+  ControllerRenderProps,
   FieldPath,
   FieldValues,
   FormProvider,
@@ -137,7 +138,7 @@ type FormFieldProps<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 > = Omit<ControllerProps<TFieldValues, TName>, "render"> & {
-  render: (props: { field: ControllerProps<TFieldValues, TName>["field"] }) => React.ReactNode;
+  render: (props: { field: ControllerRenderProps<TFieldValues, TName> }) => React.ReactElement;
 };
 
 function FormField<
