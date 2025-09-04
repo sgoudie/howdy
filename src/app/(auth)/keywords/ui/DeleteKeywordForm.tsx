@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 import { deleteKeywordAction, type DeleteKeywordResult } from "../actions";
+import { Button } from "@/components/ui/button";
 
 export function DeleteKeywordForm({
   id,
@@ -29,13 +30,9 @@ export function DeleteKeywordForm({
   return (
     <form action={formAction}>
       <input type="hidden" name="id" value={id} />
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-md border border-gray-300 px-2 py-1 text-xs hover:bg-gray-50 disabled:opacity-60"
-      >
+      <Button type="submit" size="sm" variant="outline" disabled={isPending}>
         {isPending ? "Deleting..." : "Delete"}
-      </button>
+      </Button>
     </form>
   );
 }

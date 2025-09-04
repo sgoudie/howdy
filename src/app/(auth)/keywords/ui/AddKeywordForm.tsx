@@ -2,6 +2,8 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { addKeywordAction, type AddKeywordResult } from "../actions";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export function AddKeywordForm() {
   const [state, formAction, isPending] = useActionState<AddKeywordResult, FormData>(
@@ -41,22 +43,24 @@ export function AddKeywordForm() {
 
   return (
     <form action={formAction} onSubmit={handleSubmit} className="space-y-2">
-      <div className="flex items-center gap-2">
-        <input
-          type="text"
-          name="label"
-          placeholder="keyword label"
-          value={value}
-          onChange={handleChange}
-          className="w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm uppercase focus:ring-2 focus:ring-blue-500 focus:outline-none"
-        />
-        <button
-          type="submit"
-          disabled={isPending}
-          className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
+      <div className="flex items-end gap-2">
+        <div className="flex w-full max-w-xs flex-col gap-1">
+          <label htmlFor="keyword-label" className="text-sm font-medium">
+            Keyword label
+          </label>
+          <Input
+            id="keyword-label"
+            type="text"
+            name="label"
+            placeholder="keyword label"
+            value={value}
+            onChange={handleChange}
+            className="uppercase"
+          />
+        </div>
+        <Button type="submit" disabled={isPending}>
           {isPending ? "Adding..." : "Add"}
-        </button>
+        </Button>
       </div>
       {(clientError || serverError) && (
         <div className="text-sm text-red-600">{clientError || serverError}</div>

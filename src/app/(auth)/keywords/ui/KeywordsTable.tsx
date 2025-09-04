@@ -12,6 +12,15 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { DeleteKeywordForm } from "./DeleteKeywordForm";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export type KeywordRow = { id: string; label: string; created_at: string };
 
@@ -84,50 +93,48 @@ export function KeywordsTable({ rows }: { rows: KeywordRow[] }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <input
+        <Input
           type="text"
           placeholder="Filter label..."
           value={(table.getColumn("label")?.getFilterValue() as string) ?? ""}
           onChange={(e) => table.getColumn("label")?.setFilterValue(e.target.value)}
-          className="w-60 rounded-md border border-gray-300 bg-white/80 px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          className="w-60"
         />
       </div>
 
-      <div className="overflow-x-auto rounded-md border">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            {table.getHeaderGroups().map((hg) => (
-              <tr key={hg.id} className="text-left text-gray-700">
-                {hg.headers.map((header) => (
-                  <th key={header.id} className="px-3 py-2">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.length === 0 && (
-              <tr>
-                <td colSpan={columns.length} className="py-6 text-center text-gray-500">
-                  No keywords yet
-                </td>
-              </tr>
-            )}
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="border-t">
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-3 py-2">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((hg) => (
+            <TableRow key={hg.id}>
+              {hg.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="py-6 text-center text-muted-foreground">
+                No keywords yet
+              </TableCell>
+            </TableRow>
+          )}
+          {table.getRowModel().rows.map((row) => (
+            <TableRow key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
       {error && <div className="text-sm text-red-600">{error}</div>}
     </div>

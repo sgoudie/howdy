@@ -33,15 +33,13 @@ export default async function KeywordsIndexPage() {
   const keywords = await loadKeywords();
   return (
     <div className="w-full">
-      <div className="mx-auto w-full max-w-5xl px-6 py-8">
-        <div className="rounded-xl border border-gray-200 bg-white/50 p-6 shadow-sm dark:bg-black/20">
+      <div className="mx-auto w-full max-w-5xl px-8 py-8">
           <h1 className="mb-4 text-xl font-semibold">Keywords</h1>
           <AddKeywordForm />
           <div className="mt-6">
             <KeywordsTable rows={keywords} />
           </div>
         </div>
-      </div>
     </div>
   );
 }

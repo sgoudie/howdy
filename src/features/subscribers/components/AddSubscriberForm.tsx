@@ -2,6 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useAccount } from "@/components/AccountProvider";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 //
 
 type FormState =
@@ -13,31 +20,35 @@ type FormState =
 export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel?: string }) {
   const { account } = useAccount();
   const tagToShow = account?.convertkit_howdy_tag_label || initialTagLabel || "source-howdy";
-  const [email, setEmail] = useState("");
   const [state, setState] = useState<FormState>({ status: "idle" });
-  const [phone, setPhone] = useState<string>("");
+  const formSchema = z.object({
+    email: z.string().email({ message: "Please enter a valid email." }),
+    phone: z.string().optional(),
+  });
+
+  type FormValues = z.infer<typeof formSchema>;
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { email: "", phone: "" },
+  });
 
   useEffect(() => {
     // no-op placeholder for future validations
-  }, [phone]);
+  }, []);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function onSubmit(values: FormValues) {
     console.log("AddSubscriberForm: submit handler invoked");
-    if (!email.trim()) {
-      setState({ status: "error", message: "Please enter your email." });
-      return;
-    }
 
     setState({ status: "loading" });
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
-      console.log("AddSubscriberForm: POST /api/subscribers", { email, phone });
+      console.log("AddSubscriberForm: POST /api/subscribers", values);
       const res = await fetch("/api/subscribers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, phone }),
+        body: JSON.stringify(values),
         signal: controller.signal,
       }).finally(() => clearTimeout(timeoutId));
       console.log("AddSubscriberForm: response", res.status);
@@ -64,8 +75,7 @@ export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel
         setState({ status: "error", message: friendly });
         return;
       }
-      setEmail("");
-      setPhone("");
+      form.reset({ email: "", phone: "" });
       setState({ status: "success", message: "Subscriber added successfully." });
     } catch (error) {
       const aborted = (error as { name?: string } | null)?.name === "AbortError";
@@ -79,54 +89,57 @@ export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel
     }
   }
 
-  const isLoading = state.status === "loading";
+  const isLoading = state.status === "loading" || form.formState.isSubmitting;
 
   return (
-    <div className="flex w-full items-center justify-center py-16">
-      <div className="mx-auto w-full max-w-md rounded-xl border border-gray-200 bg-white/50 p-6 shadow-sm dark:bg-black/20">
-        <h2 className="mb-2 text-xl font-semibold">Quick add subscriber</h2>
-        <p className="mb-6 text-sm text-gray-600">
-          Enter an email and optionally a phone number. We&apos;ll add it to your Kit account
-          (tagged as{" "}
-          <code className="rounded bg-gray-100 px-1 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
-            {tagToShow}
-          </code>
-          )
-        </p>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            type="email"
-            inputMode="email"
-            name="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="w-full rounded-lg border border-gray-300 bg-white/80 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-black/30"
-          />
-          <input
-            type="tel"
-            name="phone"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="phone number (optional)"
-            className="w-full rounded-lg border border-gray-300 bg-white/80 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-black/30"
-          />
-          <button
-            type="submit"
-            disabled={isLoading}
-            onClick={() => console.log("AddSubscriberForm: submit button clicked")}
-            className="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isLoading ? "Subscribing..." : "Add Subscriber"}
-          </button>
-        </form>
+      <Card className="mx-auto w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Quick add subscriber</CardTitle>
+          <CardDescription>
+            Enter an email and optionally a phone number. We&apos;ll add it to your Kit account (tagged as <code>{tagToShow}</code>)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone (optional)</FormLabel>
+                  <FormControl>
+                    <Input type="tel" placeholder="phone number (optional)" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? "Subscribing..." : "Add Subscriber"}
+            </Button>
+          </form>
+        </Form>
         {state.status === "success" && (
           <p className="mt-4 text-sm text-green-600">{state.message}</p>
         )}
         {state.status === "error" && <p className="mt-4 text-sm text-red-600">{state.message}</p>}
-      </div>
-    </div>
+        </CardContent>
+      </Card>
   );
 }

@@ -21,15 +21,31 @@ export default async function DashboardPage() {
 
   return (
     <div className="w-full">
-      <div className="mx-auto max-w-2xl px-6">
-        <h1 className="mt-8 text-2xl font-semibold">
-          Howdy {hasFirstName ? String(meta.first_name) : "friend"} 👋
-        </h1>
+      <div className="px-6 py-8">
+        <div className="mx-auto w-full max-w-5xl">
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Howdy {hasFirstName ? String(meta.first_name) : "friend"} 👋
+          </h1>
+          <div className="mt-3 space-y-2 text-sm text-muted-foreground max-w-3xl">
+            <p>
+              Howdy helps you capture leads via SMS keywords and seamlessly sync them to your
+              email list. Create keywords, connect your ConvertKit account, and start growing.
+            </p>
+            <p>
+              You can add subscribers manually, or share your keyword to let people subscribe by
+              texting it. Everything ends up tagged in ConvertKit so your automation stays tidy.
+            </p>
+          </div>
+        </div>
       </div>
+
       <div className="px-6 pb-8">
-        <AddSubscriberForm
-          initialTagLabel={(acc?.convertkit_howdy_tag_label as string | null) || undefined}
-        />
+        <div className="mx-auto grid w-full max-w-5xl gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <AddSubscriberForm
+            initialTagLabel={(acc?.convertkit_howdy_tag_label as string | null) || undefined}
+          />
+          {/* Future cards: quick stats, recent subscribers, docs links, etc. */}
+        </div>
       </div>
     </div>
   );
