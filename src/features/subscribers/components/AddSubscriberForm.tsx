@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAccount } from "@/components/AccountProvider";
 import { supabase } from "@/lib/supabaseClient";
 
 type FormState =
@@ -9,18 +10,20 @@ type FormState =
   | { status: "success"; message: string }
   | { status: "error"; message: string };
 
-export default function AddSubscriberForm() {
+export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel?: string }) {
+  const { account } = useAccount();
+  const tagToShow = account?.convertkit_howdy_tag_label || initialTagLabel || "source-howdy";
   const [email, setEmail] = useState("");
   const [state, setState] = useState<FormState>({ status: "idle" });
-  const [tagName, setTagName] = useState<string>("source-howdy");
-  const [tagError, setTagError] = useState<string | null>(null);
+  const [phone, setPhone] = useState<string>("");
 
   useEffect(() => {
-    setTagError(null);
-  }, [tagName]);
+    // no-op placeholder for future validations
+  }, [phone]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    console.log("AddSubscriberForm: submit handler invoked");
     if (!email.trim()) {
       setState({ status: "error", message: "Please enter your email." });
       return;
@@ -28,17 +31,16 @@ export default function AddSubscriberForm() {
 
     setState({ status: "loading" });
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData.session?.access_token;
-      if (!accessToken) {
-        setState({ status: "error", message: "Please log in to add subscribers." });
-        return;
-      }
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      console.log("AddSubscriberForm: POST /api/subscribers", { email, phone });
       const res = await fetch("/api/subscribers", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({ email, tag: tagName }),
-      });
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, phone }),
+        signal: controller.signal,
+      }).finally(() => clearTimeout(timeoutId));
+      console.log("AddSubscriberForm: response", res.status);
       const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({} as unknown as { ok?: boolean; error?: string }));
 
       if (!res.ok || data?.ok === false) {
@@ -59,10 +61,17 @@ export default function AddSubscriberForm() {
         return;
       }
       setEmail("");
+      setPhone("");
       setState({ status: "success", message: "Subscriber added successfully." });
     } catch (error) {
-      console.error("Network error calling /api/subscribers", error);
-      setState({ status: "error", message: "Network error. Please try again." });
+      const aborted = (error as any)?.name === "AbortError";
+      if (aborted) {
+        console.error("/api/subscribers aborted after timeout");
+        setState({ status: "error", message: "Request timed out. Please try again." });
+      } else {
+        console.error("Network error calling /api/subscribers", error);
+        setState({ status: "error", message: "Network error. Please try again." });
+      }
     }
   }
 
@@ -71,13 +80,10 @@ export default function AddSubscriberForm() {
   return (
     <div className="w-full py-16 flex items-center justify-center">
       <div className="w-full max-w-md mx-auto rounded-xl border border-gray-200 bg-white/50 dark:bg-black/20 shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-2">Add a subscriber</h2>
+        <h2 className="text-xl font-semibold mb-2">Quick add subscriber</h2>
         <p className="text-sm text-gray-600 mb-6">
-          Enter an email. We&apos;ll add it to your Kit account and tag it with {tagName ? <span className="font-medium">{tagName}</span> : "your tag"}.
+          Enter an email and optionally a phone number. We&apos;ll add it to your Kit account (tagged as <code className="px-1 rounded bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">{tagToShow}</code>)
         </p>
-        {tagError && (
-          <p className="-mt-4 mb-4 text-sm text-amber-600">{tagError}</p>
-        )}
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="email"
@@ -91,16 +97,17 @@ export default function AddSubscriberForm() {
             className="w-full rounded-lg border border-gray-300 bg-white/80 dark:bg-black/30 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
-            type="text"
-            name="tag"
-            value={tagName}
-            onChange={(e) => setTagName(e.target.value)}
-            placeholder="tag name (e.g., source-howdy)"
+            type="tel"
+            name="phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="phone number (optional)"
             className="w-full rounded-lg border border-gray-300 bg-white/80 dark:bg-black/30 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
             type="submit"
             disabled={isLoading}
+            onClick={() => console.log("AddSubscriberForm: submit button clicked")}
             className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed w-full"
           >
             {isLoading ? "Subscribing..." : "Add Subscriber"}
