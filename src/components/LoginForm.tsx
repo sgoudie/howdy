@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from 'next/navigation'
 import { supabase } from "@/lib/supabaseClient";
-import { getAppUrl } from "@/lib/appUrl";
 
 type FormState =
   | { status: "idle" }
@@ -13,6 +13,7 @@ type FormState =
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<FormState>({ status: "idle" });
+  const pathname = usePathname()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -23,11 +24,10 @@ export default function LoginForm() {
 
     setState({ status: "loading" });
     try {
-      const appUrl = getAppUrl();
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${appUrl}/auth/callback`,
+          emailRedirectTo: `${pathname}/auth/callback`,
         },
       });
       if (error) {
