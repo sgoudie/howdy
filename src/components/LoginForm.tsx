@@ -33,7 +33,7 @@ export default function LoginForm() {
         return;
       }
       setState({ status: "success", message: "Check your email for the login link." });
-    } catch (err) {
+    } catch {
       setState({ status: "error", message: "Unexpected error. Please try again." });
     }
   }

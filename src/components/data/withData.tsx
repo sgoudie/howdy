@@ -9,11 +9,11 @@ export type LoaderState<T> =
   | { status: "error"; message: string }
   | { status: "ready"; data: T };
 
-export function withUserData<P extends { user: NonNullable<unknown> }>(
-  Wrapped: (props: Omit<P, "user"> & { user: any }) => JSX.Element
+export function withUserData<UserShape, P extends { user: UserShape }>(
+  Wrapped: (props: Omit<P, "user"> & { user: UserShape }) => React.ReactElement
 ) {
   return function UserDataWrapper(props: Omit<P, "user">) {
-    const [state, setState] = useState<LoaderState<any>>({ status: "loading" });
+    const [state, setState] = useState<LoaderState<UserShape>>({ status: "loading" });
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastUserIdRef = useRef<string | null>(null);
 
@@ -38,7 +38,7 @@ export function withUserData<P extends { user: NonNullable<unknown> }>(
           return;
         }
         lastUserIdRef.current = data.user.id;
-        setState({ status: "ready", data: data.user });
+        setState({ status: "ready", data: data.user as unknown as UserShape });
       })();
 
       const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
@@ -49,7 +49,7 @@ export function withUserData<P extends { user: NonNullable<unknown> }>(
           const uid = session.user.id;
           lastUserIdRef.current = uid;
           if (timeoutRef.current) clearTimeout(timeoutRef.current);
-          setState({ status: "ready", data: session.user });
+          setState({ status: "ready", data: session.user as unknown as UserShape });
         }
       });
       return () => {
@@ -57,23 +57,22 @@ export function withUserData<P extends { user: NonNullable<unknown> }>(
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         sub.subscription.unsubscribe();
       };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     if (state.status === "loading") return <p className="text-sm text-gray-600">Loading...</p>;
     if (state.status === "error") return <p className="text-sm text-red-600">{state.message}</p>;
-    return <Wrapped {...(props as any)} user={state.data} />;
+    return <Wrapped {...(props as Omit<P, "user">)} user={state.data} />;
   };
 }
 
-export function withAccountData<P extends { account: any }>(
-  Wrapped: (props: Omit<P, "account"> & { account: any }) => JSX.Element
+export function withAccountData<AccountShape, P extends { account: AccountShape }>(
+  Wrapped: (props: Omit<P, "account"> & { account: AccountShape }) => React.ReactElement
 ) {
   return function AccountDataWrapper(props: Omit<P, "account">) {
-    const [state, setState] = useState<LoaderState<any>>({ status: "loading" });
+    const [state, setState] = useState<LoaderState<AccountShape>>({ status: "loading" });
     const reqId = useRef(0);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    
+
     // Debug state changes
     useEffect(() => {
       debugLog("Account wrapper state changed:", state);
@@ -109,7 +108,7 @@ export function withAccountData<P extends { account: any }>(
           } else {
             debugLog("account loaded successfully", data);
             debugLog("setting state to ready with data:", data);
-            setState({ status: "ready", data });
+            setState({ status: "ready", data: data as unknown as AccountShape });
           }
         } catch (err) {
           if (!mounted || reqId.current !== current) return;
@@ -145,13 +144,12 @@ export function withAccountData<P extends { account: any }>(
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         sub.subscription.unsubscribe();
       };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     debugLog("Account wrapper rendering with state:", state.status);
     if (state.status === "loading") return <p className="text-sm text-gray-600">Loading...</p>;
     if (state.status === "error") return <p className="text-sm text-red-600">{state.message}</p>;
-    return <Wrapped {...(props as any)} account={state.data} />;
+    return <Wrapped {...(props as Omit<P, "account">)} account={state.data} />;
   };
 }
 

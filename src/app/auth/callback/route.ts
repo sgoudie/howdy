@@ -18,11 +18,11 @@ export async function GET(request: NextRequest) {
         get(name: string) {
           return request.cookies.get(name)?.value;
         },
-        set(name: string, value: string, options: any) {
-          response.cookies.set({ name, value, ...options });
+        set(name: string, value: string, options: { name?: string; value?: string; [key: string]: unknown } = {}) {
+          response.cookies.set({ name, value, ...(options as Record<string, unknown>) });
         },
-        remove(name: string, options: any) {
-          response.cookies.set({ name, value: "", ...options });
+        remove(name: string, options: { name?: string; value?: string; [key: string]: unknown } = {}) {
+          response.cookies.set({ name, value: "", ...(options as Record<string, unknown>) });
         },
       },
     });

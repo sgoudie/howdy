@@ -42,7 +42,7 @@ export async function addKeywordAction(_prev: AddKeywordResult | null, formData:
     .insert({ label: upper, account_id: account.id });
 
   if (insertErr) {
-    const code = (insertErr as any)?.code as string | undefined;
+    const code = (insertErr as { code?: string } | null | undefined)?.code;
     const raw = insertErr.message || "";
     const isUnique = code === "23505" || /unique|duplicate/i.test(raw);
     const friendly = isUnique ? "Keyword already exists. Keywords must be unique." : (raw || "Failed to add keyword.");

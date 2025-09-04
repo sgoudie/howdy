@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     const { data: cookieUser } = await server.auth.getUser();
 
     let userId = cookieUser.user?.id as string | undefined;
-    let dbClient: any = server;
+    let dbClient = server;
 
     // Fallback to Authorization header Bearer token (for non-browser callers)
     if (!userId) {
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
         });
         const { data: userData } = await dbFromToken.auth.getUser();
         userId = userData.user?.id || undefined;
-        dbClient = dbFromToken as any;
+        dbClient = dbFromToken;
       }
     }
 

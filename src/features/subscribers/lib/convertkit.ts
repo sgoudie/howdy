@@ -52,8 +52,9 @@ export async function ensureTagByName(tagName: string, apiKey: string): Promise<
       },
     });
     try {
-      const dbg = await listRes.clone().json().catch(() => ({}));
-      console.log("Kit:list tags status", listRes.status, { tagsCount: Array.isArray((dbg as any).tags) ? (dbg as any).tags.length : undefined });
+      const dbg = await listRes.clone().json().catch(() => ({} as { tags?: unknown[] }));
+      const tagsCount = Array.isArray(dbg.tags) ? dbg.tags.length : undefined;
+      console.log("Kit:list tags status", listRes.status, { tagsCount });
     } catch {}
     const listJson = (await listRes.json().catch(() => ({}))) as ListTagsJson;
     if (listRes.ok && Array.isArray(listJson.tags)) {
@@ -73,7 +74,7 @@ export async function ensureTagByName(tagName: string, apiKey: string): Promise<
       body: JSON.stringify({ name }),
     });
     try {
-      const dbg = await createRes.clone().json().catch(() => ({}));
+      const dbg = await createRes.clone().json().catch(() => ({} as Record<string, unknown>));
       console.log("Kit:create tag status", createRes.status, { body: JSON.stringify(dbg) });
     } catch {}
     const createJson = (await createRes.json().catch(() => ({}))) as CreateTagJson;
@@ -119,8 +120,9 @@ export async function ensureCustomFieldByName(fieldName: string, apiKey: string)
       headers: { "Content-Type": "application/json", "X-Kit-Api-Key": apiKey },
     });
     try {
-      const dbg = await listRes.clone().json().catch(() => ({}));
-      console.log("Kit:list custom fields status", listRes.status, { count: Array.isArray((dbg as any).custom_fields) ? (dbg as any).custom_fields.length : undefined });
+      const dbg = await listRes.clone().json().catch(() => ({} as { custom_fields?: unknown[] }));
+      const count = Array.isArray(dbg.custom_fields) ? dbg.custom_fields.length : undefined;
+      console.log("Kit:list custom fields status", listRes.status, { count });
     } catch {}
     const listJson = (await listRes.json().catch(() => ({}))) as ListFieldsJson;
     if (listRes.ok && Array.isArray(listJson.custom_fields)) {
@@ -140,7 +142,7 @@ export async function ensureCustomFieldByName(fieldName: string, apiKey: string)
       body: JSON.stringify({ name, label: name, key: slugifyFieldKey(name), field_type: "text" }),
     });
     try {
-      const dbg = await createRes.clone().json().catch(() => ({}));
+      const dbg = await createRes.clone().json().catch(() => ({} as Record<string, unknown>));
       console.log("Kit:create custom field status", createRes.status, { body: JSON.stringify(dbg) });
     } catch {}
     const createJson = (await createRes.json().catch(() => ({}))) as CreateFieldJson;
@@ -338,11 +340,13 @@ export async function subscribeEmailToTag(email: string, tagName: string | undef
     return { ok: false, status: created.status, error: created.error };
   }
   const upd = await maybeUpdatePhone(created.id);
-  if (!('ok' in upd) || !upd.ok) {
+  if (!(typeof upd === 'object' && 'ok' in upd) || !upd.ok) {
     // Even if phone update fails, proceed to tag but surface the error if tagging also fails
     const tagRes = await tagSubscriberId(created.id);
     if (!tagRes.ok) return tagRes;
-    return { ok: false, status: (upd as any).status || 500, error: (upd as any).error || "Failed to update phone" };
+    const status = typeof (upd as { status?: number }).status === 'number' ? (upd as { status?: number }).status! : 500;
+    const error = typeof (upd as { error?: string }).error === 'string' ? (upd as { error?: string }).error! : "Failed to update phone";
+    return { ok: false, status, error };
   }
   return await tagSubscriberId(created.id);
 }

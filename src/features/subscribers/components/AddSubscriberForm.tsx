@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAccount } from "@/components/AccountProvider";
-import { supabase } from "@/lib/supabaseClient";
+//
 
 type FormState =
   | { status: "idle" }
@@ -41,7 +41,7 @@ export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel
         signal: controller.signal,
       }).finally(() => clearTimeout(timeoutId));
       console.log("AddSubscriberForm: response", res.status);
-      const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({} as unknown as { ok?: boolean; error?: string }));
+      const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({}) as { ok?: boolean; error?: string });
 
       if (!res.ok || data?.ok === false) {
         const status = res.status;
@@ -64,7 +64,7 @@ export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel
       setPhone("");
       setState({ status: "success", message: "Subscriber added successfully." });
     } catch (error) {
-      const aborted = (error as any)?.name === "AbortError";
+      const aborted = (error as { name?: string } | null)?.name === "AbortError";
       if (aborted) {
         console.error("/api/subscribers aborted after timeout");
         setState({ status: "error", message: "Request timed out. Please try again." });

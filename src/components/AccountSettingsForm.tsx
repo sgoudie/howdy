@@ -50,7 +50,7 @@ export default function AccountSettingsForm() {
         return;
       }
       setState({ status: "success", message: "Settings updated." });
-    } catch (_err) {
+    } catch {
       setState({ status: "error", message: "Unexpected error. Please try again." });
     }
   }

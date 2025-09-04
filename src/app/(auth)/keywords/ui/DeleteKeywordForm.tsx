@@ -9,9 +9,9 @@ export function DeleteKeywordForm({ id, onError, onSuccess }: { id: string; onEr
   useEffect(() => {
     if (!state) return;
     if (state.ok) {
-      onSuccess && onSuccess();
+      if (onSuccess) onSuccess();
     } else if (!state.ok) {
-      onError && onError(state.message);
+      if (onError) onError(state.message);
     }
   }, [state, onError, onSuccess]);
 

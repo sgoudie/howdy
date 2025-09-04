@@ -28,14 +28,12 @@ export async function getSupabaseActionClient() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value;
+      get: (name: string) => cookieStore.get(name)?.value,
+      set: (name: string, value: string, options: { name?: string; value?: string; [key: string]: unknown } = {}) => {
+        cookieStore.set({ name, value, ...(options as Record<string, unknown>) });
       },
-      set(name: string, value: string, options: any) {
-        cookieStore.set({ name, value, ...options });
-      },
-      remove(name: string, options: any) {
-        cookieStore.set({ name, value: "", ...options });
+      remove: (name: string, options: { name?: string; value?: string; [key: string]: unknown } = {}) => {
+        cookieStore.set({ name, value: "", ...(options as Record<string, unknown>) });
       },
     },
   });
