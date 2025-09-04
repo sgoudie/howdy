@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from 'next/navigation'
 import { supabase } from "@/lib/supabaseClient";
+import { getPublicEnv } from "@/lib/env";
 
 type FormState =
   | { status: "idle" }
@@ -13,7 +13,7 @@ type FormState =
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<FormState>({ status: "idle" });
-  const pathname = usePathname()
+  const { APP_URL } = getPublicEnv();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,11 +24,10 @@ export default function LoginForm() {
 
     setState({ status: "loading" });
     try {
-      console.log(pathname);
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${pathname}/auth/callback`,
+          emailRedirectTo: `${APP_URL}/auth/callback`,
         },
       });
       if (error) {
