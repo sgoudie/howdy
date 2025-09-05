@@ -411,3 +411,30 @@ export async function subscribeEmailToTag(
   }
   return await tagSubscriberId(created.id);
 }
+
+// Lightweight connectivity check for a given API key
+export async function testConvertKitApiKey(
+  apiKey: string,
+): Promise<{ ok: true; status: number } | { ok: false; status: number; error: string }> {
+  const key = (apiKey || "").trim();
+  if (!key) return { ok: false, status: 400, error: "Missing API key" };
+  try {
+    const res = await fetch("https://api.kit.com/v4/tags?limit=1", {
+      method: "GET",
+      headers: { "Content-Type": "application/json", "X-Kit-Api-Key": key },
+      // Keep it snappy; if Kit is down or slow, we surface as error
+      // @ts-expect-error: RequestInit may not type timeout but runtimes support it
+      timeout: 8000,
+    });
+    if (res.ok) return { ok: true, status: res.status };
+    let errorMsg = "Failed to reach ConvertKit";
+    try {
+      const j = (await res.json().catch(() => ({}))) as { errors?: string[]; message?: string };
+      errorMsg = Array.isArray(j.errors) && j.errors[0] ? j.errors[0] : j.message || errorMsg;
+    } catch {}
+    return { ok: false, status: res.status || 500, error: errorMsg };
+  } catch (e) {
+    const m = e instanceof Error ? e.message : "Network error";
+    return { ok: false, status: 500, error: m };
+  }
+}

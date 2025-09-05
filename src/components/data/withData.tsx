@@ -81,8 +81,8 @@ export function withAccountData<AccountShape, P extends { account: AccountShape 
 
     // Debug state changes
     useEffect(() => {
-      debugLog("Account wrapper state changed:", state);
-    }, [state]);
+      debugLog("Account wrapper state changed:", state.status);
+    }, [state.status]);
 
     useEffect(() => {
       let mounted = true;

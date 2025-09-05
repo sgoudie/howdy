@@ -3,7 +3,8 @@ import { getSupabaseServer } from "@/lib/supabaseServer";
 import AddSubscriberForm from "@/features/subscribers/components/AddSubscriberForm";
 import { Message } from "@/components/Message";
 import { appLinks } from "@/lib/config";
-
+import ConnectionStatusCard from "@/features/subscribers/components/ConnectionStatusCard";
+import { checkConvertKitConnection } from "./actions";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -21,7 +22,9 @@ export default async function DashboardPage() {
     .limit(1)
     .maybeSingle();
 
-  return (
+  const initialCkStatus = await checkConvertKitConnection();
+
+return (
     <div className="w-full">
       <div className="px-6 py-8">
         <div className="mx-auto w-full max-w-5xl">
@@ -40,7 +43,7 @@ export default async function DashboardPage() {
           </div>
           <div className="mt-4 max-w-3xl">
             <Message>
-              <p className="text-left">We're still developing Howdy. If you know someone who would like early access, please email <a href={appLinks.contactEmail} className="underline underline-offset-4">{appLinks.contactEmail}</a>.</p>
+              <p className="text-left">We&apos;re still developing Howdy. If you know someone who would like early access, please email <a href={appLinks.contactEmail} className="underline underline-offset-4">{appLinks.contactEmail}</a>.</p>
             </Message>
           </div>
         </div>
@@ -48,6 +51,7 @@ export default async function DashboardPage() {
 
       <div className="px-6 pb-8">
         <div className="mx-auto grid w-full max-w-5xl gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <ConnectionStatusCard initialStatus={initialCkStatus} />
           <AddSubscriberForm
             initialTagLabel={(acc?.convertkit_howdy_tag_label as string | null) || undefined}
           />

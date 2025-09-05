@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+// import { supabase } from "@/lib/supabaseClient";
 import { getSupabaseActionClient } from "@/lib/supabaseServer";
 import { subscribeWithAccount } from "@/features/subscribers/lib/subscribeWithAccount";
 import { createClient } from "@supabase/supabase-js";

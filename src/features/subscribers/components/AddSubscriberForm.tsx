@@ -17,7 +17,7 @@ type FormState =
   | { status: "success"; message: string }
   | { status: "error"; message: string };
 
-export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel?: string }) {
+export default function AddSubscriberForm({ initialTagLabel, disabled }: { initialTagLabel?: string; disabled?: boolean }) {
   const { account } = useAccount();
   const tagToShow = account?.convertkit_howdy_tag_label || initialTagLabel || "source-howdy";
   const [state, setState] = useState<FormState>({ status: "idle" });
@@ -90,6 +90,7 @@ export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel
   }
 
   const isLoading = state.status === "loading" || form.formState.isSubmitting;
+  const isDisabled = Boolean(disabled);
 
   return (
       <Card className="mx-auto w-full max-w-md">
@@ -109,7 +110,7 @@ export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" {...field} />
+                    <Input disabled={isDisabled || isLoading} type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -123,14 +124,14 @@ export default function AddSubscriberForm({ initialTagLabel }: { initialTagLabel
                 <FormItem>
                   <FormLabel>Phone (optional)</FormLabel>
                   <FormControl>
-                    <Input type="tel" placeholder="phone number (optional)" {...field} />
+                    <Input disabled={isDisabled || isLoading} type="tel" placeholder="phone number (optional)" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button type="submit" disabled={isLoading} className="w-full">
+            <Button type="submit" disabled={isDisabled || isLoading} className="w-full">
               {isLoading ? "Subscribing..." : "Add Subscriber"}
             </Button>
           </form>
