@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { getPublicEnv } from "@/lib/env";
-import { Hand } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Message } from "@/components/Message";
+import { appLinks } from "@/lib/config";
 import { Input } from "@/components/ui/input";
 
 type FormState =
@@ -53,7 +54,7 @@ export default function LoginForm() {
           <div className="flex flex-col items-center gap-2">
             <a href="#" className="flex flex-col items-center gap-2 font-medium">
               <div className="flex size-8 items-center justify-center rounded-md">
-                <Hand className="size-6" />
+                <span className="text-2xl">👋</span>
               </div>
               <span className="sr-only">Howdy</span>
             </a>
@@ -77,6 +78,9 @@ export default function LoginForm() {
       {state.status === "error" && (
         <div className="text-center text-xs text-red-600">{state.message}</div>
       )}
+      <Message>
+        <p className="text-left">We’re still developing Howdy. If you’d like early access, please email <a href={`mailto:${appLinks.contactEmail}`} className="underline underline-offset-4">{appLinks.contactEmail}</a>.</p>
+      </Message>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
         By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
       </div>

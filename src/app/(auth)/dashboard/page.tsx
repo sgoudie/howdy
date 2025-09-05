@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import AddSubscriberForm from "@/features/subscribers/components/AddSubscriberForm";
+import { Message } from "@/components/Message";
+import { appLinks } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -35,6 +37,11 @@ export default async function DashboardPage() {
               You can add subscribers manually, or share your keyword to let people subscribe by
               texting it. Everything ends up tagged in ConvertKit so your automation stays tidy.
             </p>
+          </div>
+          <div className="mt-4 max-w-3xl">
+            <Message>
+              <p className="text-left">We're still developing Howdy. If you know someone who would like early access, please email <a href={appLinks.contactEmail} className="underline underline-offset-4">{appLinks.contactEmail}</a>.</p>
+            </Message>
           </div>
         </div>
       </div>
