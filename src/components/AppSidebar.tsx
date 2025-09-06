@@ -1,8 +1,10 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
-import { Home, Settings, Tags, LogOut, LifeBuoy, Send } from "lucide-react";
+import { Home, Settings, Tags, LogOut, LifeBuoy, Send, Loader2 } from "lucide-react";
 import { appLinks } from "@/lib/config";
 import {
   Sidebar,
@@ -25,14 +27,40 @@ const items = [
 
 export function AppSidebar({ variant }: { variant?: "inset" | "floating" }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isNavigating, setIsNavigating] = React.useState(false);
+  React.useEffect(() => {
+    // When the path updates, navigation finished
+    setIsNavigating(false);
+  }, [pathname]);
+
+  React.useEffect(() => {
+    const onDocClick = (event: MouseEvent) => {
+      // capture internal link clicks anywhere in the app
+      let el = event.target as HTMLElement | null;
+      while (el && el.tagName && el.tagName.toLowerCase() !== "a") {
+        el = el.parentElement;
+      }
+      const anchor = el as HTMLAnchorElement | null;
+      if (!anchor) return;
+      const href = anchor.getAttribute("href") || "";
+      if (!href || href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+      if (anchor.target && anchor.target !== "") return;
+      // consider this an internal navigation intent
+      setIsNavigating(true);
+    };
+    document.addEventListener("click", onDocClick, true);
+    return () => document.removeEventListener("click", onDocClick, true);
+  }, []);
   return (
     <Sidebar variant={variant}>
       <SidebarHeader>
         <SidebarMenuItem>
           <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-            <a href="/dashboard">
+            <Link href="/dashboard" onClick={() => setIsNavigating(true)}>
               <span className="text-base font-semibold">Howdy</span>
-            </a>
+              {isNavigating && <Loader2 size={14} className="ml-1 animate-spin opacity-70" />}
+            </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarHeader>
@@ -48,7 +76,7 @@ export function AppSidebar({ variant }: { variant?: "inset" | "floating" }) {
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={active}>
-                      <Link href={item.href} className="flex items-center gap-2">
+                      <Link href={item.href} onClick={() => setIsNavigating(true)} className="flex items-center gap-2">
                         <Icon size={16} />
                         <span>{item.title}</span>
                       </Link>
